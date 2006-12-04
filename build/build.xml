@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project SYSTEM "ant.dtd">
+
+<project name="jamal" default="pack" basedir=".">
+	
+	<!-- SETUP -->
+
+    <property name="APP_DIR" value="app" />
+    <property name="BUILD_DIR" value="build" />
+	<property name="SVN_URL" value="http://teemow.com/svn/jamal/code/trunk/src" />
+
+    <property name="JS_COMPRESSOR" value="${BUILD_DIR}/js.jar" />
+    <property name="JS_PACKED" value="${APP_DIR}/jamal" />
+    
+	<!-- MAIN -->
+    <target name="svn" description="">
+		<delete dir="${APP_DIR}" />
+   		<echo message="Getting current revision number"/>
+        <exec executable="svn" outputproperty="OUT1">
+	        <arg line="info ${SVN_URL}"/>
+		</exec>
+		<exec executable="grep" inputstring="${OUT1}" outputproperty="OUT2">
+	        <arg line="Revision"/>
+		</exec>
+		<exec executable="awk" inputstring="${OUT2}" outputproperty="REV">
+	        <arg line="-F' ' '{print $2}'"/>
+		</exec>
+		<echo message="Revision: ${REV}"/>
+        <echo message="Export the new application from ${SVN_URL}..." />
+        <exec executable="svn">
+            <arg line="export -q ${SVN_URL} ${APP_DIR}"/>
+        </exec>
+        <echo message="Done!" />
+    </target>
+    
+    <target name="pack" depends="svn" description="">
+        <echo message="Packing application..." />
+        <concat destfile="${JS_PACKED}_${REV}.js">
+        	<fileset dir="${APP_DIR}" includes="dispatcher.js" />
+        	<fileset dir="${APP_DIR}" includes="jamal.js" />
+            <fileset dir="${APP_DIR}" includes="models/*.js" />
+            <fileset dir="${APP_DIR}" includes="controllers/*.js" />
+            <fileset dir="${APP_DIR}" includes="views/*.js" />
+            <fileset dir="${APP_DIR}" includes="vendors/*.js" />
+            <fileset dir="${APP_DIR}" includes="startup.js" />
+        </concat>
+        <java jar="${JS_COMPRESSOR}" fork="true">
+            <arg value="${BUILD_DIR}/pack.js" />
+            <arg value="${JS_PACKED}_${REV}.js" />
+            <arg value="${JS_PACKED}_${REV}.js" />
+        </java>
+        <delete dir="${APP_DIR}/models" />
+        <delete dir="${APP_DIR}/controllers" />
+        <delete dir="${APP_DIR}/views" />
+        <delete dir="${APP_DIR}/vendors" />
+        <delete file="${APP_DIR}/dispatcher.js" />
+        <delete file="${APP_DIR}/jamal.js" />
+        <delete file="${APP_DIR}/startup.js" />
+        <echo message="Done!" />
+    </target>
+
+</project>
+
