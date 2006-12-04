@@ -41,6 +41,6 @@ FoosController = function () {
      */
     this.index = function(filter) {
         
-    }
+    };
     
-}
+};

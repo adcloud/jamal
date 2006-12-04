@@ -145,7 +145,7 @@ Jamal.Dispatcher = {
         }
         return url;
     }
-}
+};
 
 /**
  * Extends the Jamal object itself. Can be used to add both static
