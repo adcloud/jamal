@@ -30,6 +30,12 @@
  * This is a jamal sample view
  */
 jamal.views.Foos = {
-    name: 'FoosView'
+    name: 'FoosView',
+    
+    showMoreContent: function(obj){
+        $(obj).find('a').remove();
+        var content = $(obj).html();
+        $(obj).html(content+content+content);
+    }
     
 }

@@ -20,8 +20,12 @@
  *
  * Copyright (c) 2006 John Resig, Yehuda Katz, Jörn Zaefferer
  *
- * licensed under the MIT:
+ * Dual licensed under the MIT and GPL licenses:
  *   http://www.opensource.org/licenses/mit-license.php
+ *   http://www.gnu.org/licenses/gpl.html
+ *
+ * Revision: $Id$
+ *
  */
 
 /**
@@ -80,12 +84,12 @@
 	  single: 'data'
 	};
 	
-	// reference to original set()
-	var set = $.fn.set;
+	// reference to original setArray()
+	var setArray = $.fn.setArray;
 	
-	// define new set()
-	$.fn.set = function(arr){
-	    return set.apply( this, arguments ).each(function(){
+	// define new setArray()
+	$.fn.setArray = function(arr){
+	    return setArray.apply( this, arguments ).each(function(){
 	      if ( this.metaDone ) return;
 	      
 	      var data = "{}";
@@ -95,6 +99,7 @@
 	        if ( m )
 	          data = m[1];
 	      } else if ( $.meta.type == "elem" ) {
+	      	if( !this.getElementsByTagName ) return;
 	        var e = this.getElementsByTagName($.meta.name);
 	        if ( e.length )
 	          data = $.trim(e[0].innerHTML);

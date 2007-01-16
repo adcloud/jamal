@@ -36,8 +36,10 @@ jamal.controllers.Foos = {
     /**
      * Foo index
      */
-    index: function(filter) {
-        
+    index: function() {
+        $('a').click(function(){
+            jamal.views.Foos.showMoreContent($(this).parent());
+        });
     }
     
 };
