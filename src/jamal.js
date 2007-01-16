@@ -28,186 +28,58 @@
  * @license          http://www.opensource.org/licenses/mit-license.php The MIT License
  */
 
-// Map the Jamal namespace to the '$$' one
-var $$ = Jamal;
-
-Jamal.fn = Jamal.prototype = {
-	/**
-	 * The current SVN version of Jamal.
-	 *
-	 * @private
-	 * @property
-	 * @name jamal
-	 * @type String
-	 * @cat Core
-	 */
-	jamal: "$Revision$",
-    
-    here: '',
-    name: '',
-    action: '',
-
-    params: {},
-    
-    dispatch: function(routes) {
-        return $$.Dispatcher.init(routes);
+var jamal = {
+    version: '0.2-4',
+    start: function() {
+        var start_time = new Date();
+        var start_mseconds = start_time.getTime();
+        this.configure();
+        this.log('Starting the Jamal application (Version: '+this.version+')...');
+        this.log('Controller: ' + this.controller);
+        this.log('Action: ' + this.action);
+        this.load();
+        var end_time = new Date();
+        var end_mseconds = end_time.getTime();
+        this.log('This took ' + (end_mseconds-start_mseconds) + ' milliseconds');
+        this.log('Jamal size: '+this.toSource().length);
     },
-    
-    controller: function (uri) {
-        if (uri) {
-            uri_splitted = uri.split("/")
-            controller = uri_splitted[0];
-            action = uri_splitted[1];
-            try {
-                eval('controller = new ' + controller + 'Controller();');
-                eval('controller.'+action+'();');
-            } catch(e) {
-                if (debug) {
-                    throw e;
-                }
-                return false;
+    log: function(message) {
+        if (jamal.debug === true && $.browser.mozilla) {
+            window.console.log(message);
+        }
+    },
+    error: function(message) {
+        if (jamal.debug === true && $.browser.mozilla) {
+            this.log('Error: '+message);
+            if (arguments.length>1) {
+                e = arguments[1];
+                this.log(e.name+': '+e.message);
             }
-            return controller;
-        } else {
+        }
+    },
+    configure: function() {
+        data = $('.jamal').data();
+        this.controller = data.controller;
+        this.action = data.action;
+        this.debug = data.debug;
+    },
+    load: function () {
+        try {
+            this.controller = eval('this.controllers.'+this.controller);
+        } catch(e) {
+            this.error('Controller not found!', e);
             return false;
         }
-    },
-    
-    model: {}
-    
-};
-
-/**
- * Dispatcher
- *
- */
-Jamal.Dispatcher = {
-    getPage: function() {
-        if (page) {
-            return this.page;
-        } else {
-            return $$.Dispatcher.fixUrl(location.pathname);
+        try {
+            eval('this.controller.'+this.action+'();');
+        } catch(e) {
+            this.error('Action not found!', e);
+            return false;
         }
+        return true;
     },
-
-    init: function() {
-        action = routes[this.page];
-        
-        if (!action) {
-            for (var route in routes) {
-                page = this.page;
-                if (!action) {
-                    // fix route
-                    fixed_route = this._fixPath(route);
-                    
-                    // check fixed route
-                    if (fixed_route == page) {
-                        action = routes[route];
-                    } else {
-                        // check for wildcards
-                        if (fixed_route.search(/(\/\*\/)/) != -1) {
-                            fixed_route = fixed_route.split('/');
-                            page = this.page.split('/');
-                            star = 0;
-                            
-                            // find a wildcard
-                            fixed_route.forEach(function(element, index, array) {
-                                if (element == '*') {
-                                    star = index;
-                                }
-                            });
-                            if (star != 0) {
-                                // found a wildcard
-                                page[star] = '*';
-                                page = this._fixPath(page.join('/'));
-                                action = routes[page];
-                                
-                                if (!action) {
-                                    // check fixed wildcard route
-                                    fixed_route = fixed_route.join('/');
-                                    if (fixed_route == page) {
-                                        action = routes[route];
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        this.controller = this._loadController(action);
-    },
-    
-    fixUrl: function(url) {
-        url = url.toLowerCase();
-        if (url.search(/\/$/) == -1) {
-            url = url + '/';
-        }
-        return url;
-    }
+    models: {},
+    views: {},
+    controllers: {}
 };
-
-/**
- * Extends the Jamal object itself. Can be used to add both static
- * functions and plugin methods.
- * 
- * @example $.fn.extend({
- *   check: function() {
- *     this.each(function() { this.checked = true; });
- *   ),
- *   uncheck: function() {
- *     this.each(function() { this.checked = false; });
- *   }
- * });
- * $("input[@type=checkbox]").check();
- * $("input[@type=radio]").uncheck();
- * @desc Adds two plugin methods.
- *
- * @private
- * @name extend
- * @param Object obj
- * @type Object
- * @cat Core
- */
-
-/**
- * Extend one object with another, returning the original,
- * modified, object. This is a great utility for simple inheritance.
- * 
- * @example var settings = { validate: false, limit: 5, name: "foo" };
- * var options = { validate: true, name: "bar" };
- * Jamal.extend(settings, options);
- * @result settings == { validate: true, limit: 5, name: "bar" }
- *
- * @test var settings = { xnumber1: 5, xnumber2: 7, xstring1: "peter", xstring2: "pan" };
- * var options =     { xnumber2: 1, xstring2: "x", xxx: "newstring" };
- * var optionsCopy = { xnumber2: 1, xstring2: "x", xxx: "newstring" };
- * var merged = { xnumber1: 5, xnumber2: 1, xstring1: "peter", xstring2: "x", xxx: "newstring" };
- * Jamal.extend(settings, options);
- * isSet( settings, merged, "Check if extended: settings must be extended" );
- * isSet ( options, optionsCopy, "Check if not modified: options must not be modified" );
- *
- * @name $.extend
- * @param Object obj The object to extend
- * @param Object prop The object that will be merged into the first.
- * @type Object
- * @cat Javascript
- */
-Jamal.extend = function(obj,prop) {
-	if ( !prop ) { prop = obj; obj = this; }
-	for ( var i in prop ) obj[i] = prop[i];
-	return obj;
-};
-
-Jamal.extend({
-	/**
-	 * @private
-	 * @name init
-	 * @type undefined
-	 * @cat Core
-	 */
-	init: function(){
-		Jamal.initDone = true;
-    }
-});
 

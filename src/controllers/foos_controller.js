@@ -30,17 +30,14 @@
  * This is a sample controller
  *
  */
-FoosController = function () {
-    this.name = 'FoosController';
-    
-    views.Foos = new FoosView();
-    models.Foo = new Foo();
+jamal.controllers.Foos = {
+    name: 'FoosController',
     
     /**
      * Foo index
      */
-    this.index = function(filter) {
+    index: function(filter) {
         
-    };
+    }
     
 };

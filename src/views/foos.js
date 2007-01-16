@@ -29,7 +29,7 @@
  *
  * This is a jamal sample view
  */
-FoosView = function () {
-    this.name = 'FoosView';
+jamal.views.Foos = {
+    name: 'FoosView'
     
 }

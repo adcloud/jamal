@@ -29,7 +29,7 @@
  *
  * This is a jamal sample model
  */
-Foo = function () {
-    this.name = 'Foo';
+jamal.models.Foo = {
+    name: 'Foo'
     
 }

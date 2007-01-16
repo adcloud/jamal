@@ -32,30 +32,9 @@
  */
  
 /*
- * Routes
- *
- * Routes tell the dispatcher which controller action has to be used
- * There will be an alternative soon. To minimize the size of the javascript 
- * application it will be possible to define controller and action in your
- * markup. This will look like: <body class="jamal controller action"> 
- */
-var routes = {
-    '/': 'Foo/index' 
-};
-
-/*
  * Window onload replacement of jquery
  *
  */
-var debug = 1;
-var views = {};
-var models = {};
-var dispatcher;
-
 $(document).ready(function(){
-    // will be deprecated soon. changes to: Jamal.init(routes);
-    dispatcher = new Dispatcher(routes);
+    jamal.start();
 });
-
-
-
