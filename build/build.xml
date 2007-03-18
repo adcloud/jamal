@@ -2,8 +2,8 @@
 <!DOCTYPE project SYSTEM "ant.dtd">
 
 <project name="jamal" default="pack" basedir=".">
-	
-	<!-- SETUP -->
+    
+    <!-- SETUP -->
 
     <property name="SRC_DIR" value="../src" />
     <property name="DIST_DIR" value="../dist" />
@@ -11,9 +11,9 @@
 
     <property name="JS_COMPRESSOR" value="${BUILD_DIR}/js.jar" />
     
-	<!-- MAIN -->
+    <!-- MAIN -->
     <target name="folders" description="">
-		<delete dir="${DIST_DIR}" quiet="true" />
+        <delete dir="${DIST_DIR}" quiet="true" />
         <mkdir dir="${DIST_DIR}" />
         <mkdir dir="${DIST_DIR}/controllers" />
         <mkdir dir="${DIST_DIR}/models" />
@@ -25,7 +25,7 @@
     <target name="pack" depends="folders" description="">
         <echo message="Packing application..." />
         <concat destfile="${DIST_DIR}/jamal.js">
-        	<fileset dir="${SRC_DIR}" includes="jamal.js" />
+            <fileset dir="${SRC_DIR}" includes="jamal.js" />
             <fileset dir="${SRC_DIR}" includes="plugins/*.js" />
         </concat>
         <java jar="${JS_COMPRESSOR}" fork="true">
