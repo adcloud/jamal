@@ -5,57 +5,37 @@
 	
 	<!-- SETUP -->
 
-    <property name="APP_DIR" value="app" />
+    <property name="SRC_DIR" value="../src" />
+    <property name="DIST_DIR" value="../dist" />
     <property name="BUILD_DIR" value="build" />
-	<property name="SVN_URL" value="http://teemow.com/svn/jamal/code/trunk/src" />
 
     <property name="JS_COMPRESSOR" value="${BUILD_DIR}/js.jar" />
-    <property name="JS_PACKED" value="${APP_DIR}/jamal" />
     
 	<!-- MAIN -->
-    <target name="svn" description="">
-		<delete dir="${APP_DIR}" />
-   		<echo message="Getting current revision number"/>
-        <exec executable="svn" outputproperty="OUT1">
-	        <arg line="info ${SVN_URL}"/>
-		</exec>
-		<exec executable="grep" inputstring="${OUT1}" outputproperty="OUT2">
-	        <arg line="Revision"/>
-		</exec>
-		<exec executable="awk" inputstring="${OUT2}" outputproperty="REV">
-	        <arg line="-F' ' '{print $2}'"/>
-		</exec>
-		<echo message="Revision: ${REV}"/>
-        <echo message="Export the new application from ${SVN_URL}..." />
-        <exec executable="svn">
-            <arg line="export -q ${SVN_URL} ${APP_DIR}"/>
-        </exec>
-        <echo message="Done!" />
+    <target name="folders" description="">
+		<delete dir="${DIST_DIR}" quiet="true" />
+        <mkdir dir="${DIST_DIR}" />
+        <mkdir dir="${DIST_DIR}/controllers" />
+        <mkdir dir="${DIST_DIR}/models" />
+        <mkdir dir="${DIST_DIR}/views" />
+        <mkdir dir="${DIST_DIR}/plugins" />
+        <copy file="${SRC_DIR}/startup.js" tofile="${DIST_DIR}/startup.js"/>
     </target>
     
-    <target name="pack" depends="svn" description="">
+    <target name="pack" depends="folders" description="">
         <echo message="Packing application..." />
-        <concat destfile="${JS_PACKED}_${REV}.js">
-        	<fileset dir="${APP_DIR}" includes="dispatcher.js" />
-        	<fileset dir="${APP_DIR}" includes="jamal.js" />
-            <fileset dir="${APP_DIR}" includes="models/*.js" />
-            <fileset dir="${APP_DIR}" includes="controllers/*.js" />
-            <fileset dir="${APP_DIR}" includes="views/*.js" />
-            <fileset dir="${APP_DIR}" includes="vendors/*.js" />
-            <fileset dir="${APP_DIR}" includes="startup.js" />
+        <concat destfile="${DIST_DIR}/jamal.js">
+        	<fileset dir="${SRC_DIR}" includes="jamal.js" />
+            <fileset dir="${SRC_DIR}" includes="plugins/*.js" />
         </concat>
         <java jar="${JS_COMPRESSOR}" fork="true">
             <arg value="${BUILD_DIR}/pack.js" />
-            <arg value="${JS_PACKED}_${REV}.js" />
-            <arg value="${JS_PACKED}_${REV}.js" />
+            <arg value="${DIST_DIR}/jamal.js" />
+            <arg value="${DIST_DIR}/jamal_packed.js" />
         </java>
-        <delete dir="${APP_DIR}/models" />
-        <delete dir="${APP_DIR}/controllers" />
-        <delete dir="${APP_DIR}/views" />
-        <delete dir="${APP_DIR}/vendors" />
-        <delete file="${APP_DIR}/dispatcher.js" />
-        <delete file="${APP_DIR}/jamal.js" />
-        <delete file="${APP_DIR}/startup.js" />
+        <echo message="You now have a jamal application in ${DIST_DIR}." />
+        <echo message="There is a readable version and a packed one." />
+        <echo message="Don't forget to add jQuery!" />
         <echo message="Done!" />
     </target>
 
