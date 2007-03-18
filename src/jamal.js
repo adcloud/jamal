@@ -38,120 +38,120 @@
 var jamal = {
     /* Properties */
 
-	/**
-	 * The current version of jamal.
-	 *
-	 * @private
-	 * @property
-	 * @name version
-	 * @type String
-	 * @cat core
-	 */
+    /**
+     * The current version of jamal.
+     *
+     * @private
+     * @property
+     * @name version
+     * @type String
+     * @cat core
+     */
     version: '0.3-5',
 
-	/**
-	 * Defines the root element with the jamal configuration class. This is 
+    /**
+     * Defines the root element with the jamal configuration class. This is 
      * necessary due to performance. jQuery is a lot faster in finding classes
      * when it knows the holding element.
-	 *
-	 * @private
-	 * @property
-	 * @name root
-	 * @type String
-	 * @cat core
-	 */
+     *
+     * @private
+     * @property
+     * @name root
+     * @type String
+     * @cat core
+     */
     root: 'body',
 
-	/**
-	 * Name of the current controller.
-	 *
-	 * @public
-	 * @property
-	 * @name name
-	 * @type String
-	 * @cat core
-	 */
+    /**
+     * Name of the current controller.
+     *
+     * @public
+     * @property
+     * @name name
+     * @type String
+     * @cat core
+     */
     name: '',
 
-	/**
-	 * Name of the current action.
-	 *
-	 * @public
-	 * @property
-	 * @name action
-	 * @type String
-	 * @cat core
-	 */
+    /**
+     * Name of the current action.
+     *
+     * @public
+     * @property
+     * @name action
+     * @type String
+     * @cat core
+     */
     action: '',
 
-	/**
-	 * Current controller object.
-	 *
-	 * @public
-	 * @property
-	 * @name controller
-	 * @type Object
-	 * @cat core
-	 */
+    /**
+     * Current controller object.
+     *
+     * @public
+     * @property
+     * @name controller
+     * @type Object
+     * @cat core
+     */
     controller: {},
 
-	/**
-	 * Map of all available models.
-	 *
-	 * @public
-	 * @property
-	 * @name models
-	 * @type Map
-	 * @cat core
-	 */
+    /**
+     * Map of all available models.
+     *
+     * @public
+     * @property
+     * @name models
+     * @type Map
+     * @cat core
+     */
     models: {},
 
-	/**
-	 * Map of all available views.
-	 *
-	 * @public
-	 * @property
-	 * @name views
-	 * @type Map
-	 * @cat core
-	 */
+    /**
+     * Map of all available views.
+     *
+     * @public
+     * @property
+     * @name views
+     * @type Map
+     * @cat core
+     */
     views: {},
 
-	/**
-	 * Map of all available controllers.
-	 *
-	 * @public
-	 * @property
-	 * @name controllers
-	 * @type Map
-	 * @cat core
-	 */
+    /**
+     * Map of all available controllers.
+     *
+     * @public
+     * @property
+     * @name controllers
+     * @type Map
+     * @cat core
+     */
     controllers: {},
     
-	/**
-	 * Debug flag to give more information about jamal in the console.
-	 *
-	 * @private
-	 * @property
-	 * @name debug
-	 * @type Boolean
-	 * @cat core
-	 */
+    /**
+     * Debug flag to give more information about jamal in the console.
+     *
+     * @private
+     * @property
+     * @name debug
+     * @type Boolean
+     * @cat core
+     */
     debug: false,
 
     /* Methods */
     
-	/**
+    /**
      * Method description
-	 *
-	 * @example jamal.start();
-	 * @result jamal.controller == [ new Controller ]
-	 *
-	 * @public
-	 * @name start
-	 * @type jamal
-	 * @cat core
-	 */
+     *
+     * @example jamal.start();
+     * @result jamal.controller == [ new Controller ]
+     *
+     * @public
+     * @name start
+     * @type jamal
+     * @cat core
+     */
     start: function() {
         if (this.configure()) {
             this.log('Starting the Jamal application (Version: '+this.version+')...');
@@ -170,18 +170,18 @@ var jamal = {
         }
     },
 
-	/**
+    /**
      * Log messages on the browser console. Firebug is recommended.
-	 *
-	 * @example jamal.log('current controller: ' + this.controller);
-	 *
-	 * @public
-	 * @name start
-	 * @type debug
+     *
+     * @example jamal.log('current controller: ' + this.controller);
+     *
+     * @public
+     * @name start
+     * @type debug
      * @param String message The message to be displayed on the console
      * @param String message (optional) More messages to be displayed on the console
-	 * @cat log
-	 */
+     * @cat log
+     */
     log: function(message) {
         if (this.debug === true) {
             var log = '';
@@ -195,18 +195,18 @@ var jamal = {
         }
     },
 
-	/**
-     * Method description
-	 *
-	 * @example jamal.error('Controller not found!');
-	 *
-	 * @public
-	 * @name start
-	 * @type debug
+    /**
+     * Log jamal errors to the console
+     *
+     * @example jamal.error('Controller not found!');
+     *
+     * @public
+     * @name start
+     * @type debug
      * @param String message Error message to be displayed on the console
      * @param Object e (optional) Error object to display the original error
-	 * @cat log
-	 */
+     * @cat log
+     */
     error: function(message) {
         this.log('Jamal Error: '+message);
         if (arguments.length>1) {
@@ -215,36 +215,44 @@ var jamal = {
         }
     },
 
-	/**
-     * Method description
-	 *
-	 * @example jamal.dir(obj);
-	 * @result [ { prop1: val1, prop2: val2 } ]
-	 *
-	 * @public
-	 * @name dir
-	 * @type debug
+    /**
+     * Log objects to the console
+     *
+     * @example jamal.dir(obj);
+     * @result [ { prop1: val1, prop2: val2 } ]
+     *
+     * @public
+     * @name dir
+     * @type debug
      * @param Object obj The object which should be logged on the console.
-	 * @cat log
-	 */
+     * @cat log
+     */
     dir: function(obj) {
         if (this.debug === true) {
             window.console.dir(obj);
         }
     },
 
-	/**
-     * Method description
-	 *
-	 * @example jamal.configure();
-	 * @before <body class="jamal {controller:'Tests',action:'index'}">
+    /**
+     * Try to configure jamal
+     *
+     * Currently it is expected that there is a dom element with metadata
+     * attached. This data is read via jQuery's metadata plugin.
+     *
+     * This makes it very easy to use jamal with e.g. CakePHP. Just add
+     * <body class="jamal {controller:'<?php echo $this->name; ?>',action:'<?php echo $this->action; ?>'}"> 
+     * to your default layout. Now you only need to create and include the 
+     * corresponding js files.
+     *
+     * @example jamal.configure();
+     * @before <body class="jamal {controller:'Tests',action:'index'}">
      * @result [ jamal.controller = 'Tests', jamal.action = 'index' ]
      *
-	 * @private
-	 * @name configure
-	 * @type jamal
-	 * @cat core
-	 */
+     * @private
+     * @name configure
+     * @type jamal
+     * @cat core
+     */
     configure: function() {
         data = $(this.root+'.jamal').data();
         if (typeof(data) !== 'object') {
@@ -259,16 +267,16 @@ var jamal = {
         }
     },
 
-	/**
-     * Method description
-	 *
-	 * @example jamal.load();
-	 *
-	 * @public
-	 * @name load
-	 * @type mvc
-	 * @cat core
-	 */
+    /**
+     * Try to load the controller action 
+     *
+     * @example jamal.load();
+     *
+     * @public
+     * @name load
+     * @type mvc
+     * @cat core
+     */
     load: function () {
         try {
             this.controller = eval('this.controllers.'+this.name);
@@ -286,67 +294,73 @@ var jamal = {
     },
     
     /**
-     * Redirect
+     * Reloads the current page
      *
-     * @example jamal.redirect();
+     * @example jamal.reload();
      *
      * @public
-     * @name redirect
+     * @name reload
      * @type jamal
      * @cat session
      */
-    redirect: function() {
+    reload: function() {
         location.replace(location.href);
     },
 
-	/**
-     * Method description
-	 *
-	 * @example jamal.json('/test/', 
+    /**
+     * A wrapper for jQuerys getJSON
+     *
+     * We need a wrapper here to add the global callback. Please use jamal.json
+     * in your controllers/models.
+     *
+     * @example jamal.json('/test/', 
      *   function(response) {
      *     jamal.dir(response.data);
      *   });
-	 *
-	 * @public
-	 * @name json
-	 * @type json
+     *
+     * @public
+     * @name json
+     * @type json
      * @param String url The URL of the page to load.
      * @param Function callback A function to be executed whenever the data is loaded.
-	 * @cat model
+     * @cat model
      * @todo this method should be moved to a general jamal model class
-	 */
+     */
     json: function(url, callback) {
         $.getJSON(url, null, function(response) {
             jamal.callback(response, callback);
         });
     },
 
-	/**
+    /**
      * A general callback for the application
+     *
+     * If the server reports a session timeout jamal reloads the current
+     * page.
      *
      * Jamal expects a JSON response like 
      * { 
      *   session_timeout: false,
      *   data: {}
      * }
-	 *
-	 * @example jamal.callback(response, 
+     *
+     * @example jamal.callback(response, 
      *   function(response){
      *     jamal.dir(response.data)
      *   });
-	 *
-	 * @public
-	 * @name callback
-	 * @type json
+     *
+     * @public
+     * @name callback
+     * @type json
      * @param Object response JSON response from the server.
      * @param Function callback A function to be executed whenever the data is loaded.
-	 * @cat model
+     * @cat model
      * @todo this method should be moved to a general jamal model class
-	 */
+     */
     callback: function(response, callback){
         if (response.session_timeout) {
             // session timeout
-            jamal.redirect();
+            jamal.reload();
         } else {
             if (callback) {
                 callback(response);
