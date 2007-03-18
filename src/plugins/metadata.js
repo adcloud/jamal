@@ -1,21 +1,5 @@
-/* SVN FILE: $Id: jamal.js 4 2006-12-04 12:43:03Z teemow $ */
+/* SVN FILE: $Id: plugins.js 2378 2007-02-26 14:56:56Z teemow $ */
 /**
- * Short description for file.
- *
- * jQuery plugins
- *
- * @package          jamal
- * @subpackage       jamal.core
- * @since            Jamal v 0.1
- * @version          $Revision$
- * @modifiedby       $LastChangedBy$
- * @lastmodified     $Date$
- * @license          http://www.opensource.org/licenses/mit-license.php The MIT License
- * 
- */
- 
-
-/*
  * Metadata - jQuery plugin for parsing metadata from elements
  *
  * Copyright (c) 2006 John Resig, Yehuda Katz, Jörn Zaefferer
@@ -24,7 +8,7 @@
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
  *
- * Revision: $Id$
+ * Revision: $Id: plugins.js 2378 2007-02-26 14:56:56Z teemow $
  *
  */
 
@@ -135,3 +119,4 @@
 	  return this[0][$.meta.single || "data"];
 	};
 })(jQuery);
+
