@@ -15,11 +15,6 @@
     <target name="folders" description="">
         <delete dir="${DIST_DIR}" quiet="true" />
         <mkdir dir="${DIST_DIR}" />
-        <mkdir dir="${DIST_DIR}/controllers" />
-        <mkdir dir="${DIST_DIR}/models" />
-        <mkdir dir="${DIST_DIR}/views" />
-        <mkdir dir="${DIST_DIR}/plugins" />
-        <copy file="${SRC_DIR}/startup.js" tofile="${DIST_DIR}/startup.js"/>
     </target>
     
     <target name="pack" depends="folders" description="">
@@ -27,6 +22,10 @@
         <concat destfile="${DIST_DIR}/jamal.js">
             <fileset dir="${SRC_DIR}" includes="jamal.js" />
             <fileset dir="${SRC_DIR}" includes="plugins/*.js" />
+            <fileset dir="${SRC_DIR}" includes="controllers/*.js" />
+            <fileset dir="${SRC_DIR}" includes="models/*.js" />
+            <fileset dir="${SRC_DIR}" includes="views/*.js" />
+            <fileset dir="${SRC_DIR}" includes="startup.js" />
         </concat>
         <java jar="${JS_COMPRESSOR}" fork="true">
             <arg value="${BUILD_DIR}/pack.js" />
