@@ -38,7 +38,7 @@ $j.c.Foos = {
      */
     index: function() {
         $('a').click(function(){
-            jamal.views.Foos.showMoreContent($(this).parent());
+            $j.v.Foos.showMoreContent($(this).parent());
         });
     }
     

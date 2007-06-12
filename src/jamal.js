@@ -279,13 +279,13 @@ var jamal = {
      */
     load: function () {
         try {
-            this.controller = eval('this.controllers.'+this.name);
+            this.current = eval('this.c.'+this.name);
         } catch(e) {
             this.error('Controller not found!', e);
             return false;
         }
         try {
-            eval('this.controller.'+this.action+'();');
+            eval('this.current.'+this.action+'();');
         } catch(e) {
             this.error('Action not found!', e);
             return false;
