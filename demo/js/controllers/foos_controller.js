@@ -30,7 +30,7 @@
  * This is a sample controller
  *
  */
-jamal.controllers.Foos = {
+$j.c.Foos = {
     name: 'FoosController',
     
     /**

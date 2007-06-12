@@ -29,7 +29,7 @@
  *
  * This is a jamal sample view
  */
-jamal.views.Foos = {
+$j.v.Foos = {
     name: 'FoosView',
     
     showMoreContent: function(obj){

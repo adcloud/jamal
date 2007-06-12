@@ -47,7 +47,7 @@ var jamal = {
      * @type String
      * @cat core
      */
-    version: '0.3-5',
+    version: '0.4',
 
     /**
      * Defines the root element with the jamal configuration class. This is 
@@ -93,7 +93,7 @@ var jamal = {
      * @type Object
      * @cat core
      */
-    controller: {},
+    current: {},
 
     /**
      * Map of all available models.
@@ -104,7 +104,7 @@ var jamal = {
      * @type Map
      * @cat core
      */
-    models: {},
+    m: {},
 
     /**
      * Map of all available views.
@@ -115,7 +115,7 @@ var jamal = {
      * @type Map
      * @cat core
      */
-    views: {},
+    v: {},
 
     /**
      * Map of all available controllers.
@@ -126,7 +126,7 @@ var jamal = {
      * @type Map
      * @cat core
      */
-    controllers: {},
+    c: {},
     
     /**
      * Debug flag to give more information about jamal in the console.
@@ -368,4 +368,9 @@ var jamal = {
         }
     }
 };
+
+/**
+ * Map the jamal namespace to $j
+ */
+var $j = jamal;
 

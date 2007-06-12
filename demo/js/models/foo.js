@@ -29,7 +29,7 @@
  *
  * This is a jamal sample model
  */
-jamal.models.Foo = {
+$j.m.Foo = {
     name: 'Foo'
     
 }
