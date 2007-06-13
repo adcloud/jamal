@@ -164,8 +164,8 @@ var jamal = {
             if (this.debug === true) {
                 window.console.timeEnd('Timing');
             }
-            if ($.browser.mozilla) {
-                this.log('Jamal size: '+this.toSource().length);
+            if (jQuery.browser.mozilla) {
+                this.log('Jamal size: '+this.toSource().length+' Chars');
             }
         }
     },
@@ -254,10 +254,17 @@ var jamal = {
      * @cat core
      */
     configure: function() {
-        data = $(this.root+'.jamal').data();
+        try {
+            data = jQuery(this.root+'.jamal').data();
+        } catch(e) {
+            this.debug = true;
+            this.error('jQuery Metadata Plugin failed to read the configuration. '+
+                       'Probably there is no class="jamal {controller:\'example\',action:\'index\'}" in your markup!', e);
+        }
+        
         if (typeof(data) !== 'object') {
             this.debug = true;
-            jamal.error('No configuration found!');
+            this.error('No configuration found!');
             return false;
         } else {
             this.name = data.controller;
@@ -327,7 +334,7 @@ var jamal = {
      * @todo this method should be moved to a general jamal model class
      */
     json: function(url, callback) {
-        $.getJSON(url, null, function(response) {
+        jQuery.getJSON(url, null, function(response) {
             jamal.callback(response, callback);
         });
     },
@@ -366,11 +373,40 @@ var jamal = {
                 callback(response);
             }
         }
-    }
+    },
+    
+	/**
+	 * Run this function to give control of the $j variable back
+	 * to whichever library first implemented it. This helps to make 
+	 * sure that jamal doesn't conflict with the $j object
+	 * of other libraries.
+	 *
+	 * By using this function, you will only be able to access jamal
+	 * using the 'jamal' variable. For example, where you used to do
+	 * $j.json("/example/action"), you now must do jamal.json("/example/action").
+	 *
+	 * @example jamal.noConflict();
+	 * // Do something with jamal
+	 * jamal.json("/example/action");
+	 * @desc Maps the original object that was referenced by $j back to $j
+	 *
+	 * @name noConflict
+	 * @type undefined
+	 * @cat core 
+	 */
+	noConflict: function() {
+		if (jamal._$) {
+			$j = jamal._$j;
+        }
+		return jamal;
+	}
 };
 
-/**
- * Map the jamal namespace to $j
- */
+// Map over the $j in case of overwrite
+if ( typeof $j != "undefined" ) {
+	jamal._$j = $j;
+}
+
+// Map the jamal namespace to '$j'
 var $j = jamal;
 
