@@ -285,19 +285,27 @@ var jamal = {
      * @cat core
      */
     load: function () {
-        try {
-            this.current = eval('this.c.'+this.name);
-        } catch(e) {
-            this.error('Controller not found!', e);
-            return false;
+        var loaded = false;
+        if (typeof this.c[this.name] === 'object') {
+            try {
+                this.current = this.c[this.name];
+            } catch(e) {
+                this.error('Controller Error!', e);
+            }
+            if (typeof this.c[this.name][this.action] === 'function') {
+                try {
+                    this.current[this.action]();
+                    loaded = true;
+                } catch(e) {
+                    this.error('Action couldn\'t be started!', e);
+                }
+            } else {
+                this.log('Action not found!');
+            }
+        } else {
+            this.log('Controller not found!');
         }
-        try {
-            eval('this.current.'+this.action+'();');
-        } catch(e) {
-            this.error('Action not found!', e);
-            return false;
-        }
-        return true;
+        return loaded;
     },
     
     /**
