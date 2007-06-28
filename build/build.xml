@@ -18,12 +18,13 @@
     <target name="pack" depends="folders" description="">
         <echo message="Packing application..." />
         <concat destfile="${DIST_DIR}/jamal.js">
+            <fileset dir="${SRC_DIR}" includes="intro.js" />
             <fileset dir="${SRC_DIR}" includes="jamal.js" />
-            <fileset dir="${SRC_DIR}" includes="plugins/*.js" />
-            <fileset dir="${SRC_DIR}" includes="controllers/*.js" />
-            <fileset dir="${SRC_DIR}" includes="models/*.js" />
-            <fileset dir="${SRC_DIR}" includes="views/*.js" />
             <fileset dir="${SRC_DIR}" includes="startup.js" />
+            <fileset dir="${SRC_DIR}" includes="components/session.js" />
+            <fileset dir="${SRC_DIR}" includes="components/modal.js" />
+            <fileset dir="${SRC_DIR}" includes="plugins/*.js" />
+            <fileset dir="${SRC_DIR}" includes="outro.js" />
         </concat>
         <java jar="${JS_COMPRESSOR}" fork="true">
             <arg value="${BUILD_DIR}/pack.js" />

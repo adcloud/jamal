@@ -29,7 +29,7 @@
  *
  * This is a jamal sample model
  */
-$j.m.Foo = {
+$j.m({ Foo: {
     name: 'Foo'
-    
 }
+});

@@ -29,13 +29,30 @@
  */
 
 /**
- * Create the jamal Object
+ * Create a new jamal Object
+ *
+ * @constructor
+ * @private
+ * @name jamal
+ * @cat core
+ */
+var jamal = function() {
+    // If the context is global, return a new object
+    if (window == this) {
+        return new jamal();
+    }
+    
+    return this.start();
+};
+
+/**
+ * Create the jamal core prototype
  *
  * @public
  * @name jamal
  * @cat core
  */
-var jamal = {
+jamal.fn = jamal.prototype = {
     /* Properties */
 
     /**
@@ -100,7 +117,7 @@ var jamal = {
      *
      * @public
      * @property
-     * @name models
+     * @name m
      * @type Map
      * @cat core
      */
@@ -111,7 +128,7 @@ var jamal = {
      *
      * @public
      * @property
-     * @name views
+     * @name v
      * @type Map
      * @cat core
      */
@@ -122,12 +139,12 @@ var jamal = {
      *
      * @public
      * @property
-     * @name controllers
+     * @name c
      * @type Map
      * @cat core
      */
     c: {},
-    
+
     /**
      * Debug flag to give more information about jamal in the console.
      *
@@ -160,13 +177,16 @@ var jamal = {
             if (this.debug === true) {
                 window.console.time('Timing');
             }
-            this.load();
+            var started = this.load();
             if (this.debug === true) {
                 window.console.timeEnd('Timing');
             }
             if (jQuery.browser.mozilla) {
                 this.log('Jamal size: '+this.toSource().length+' Chars');
             }
+            return started;
+        } else {
+            return false;
         }
     },
 
@@ -270,6 +290,9 @@ var jamal = {
             this.name = data.controller;
             this.action = data.action;
             this.debug = data.debug;
+            if(!data.noConflict) {
+                $j = this;
+            }
             return true;
         }
     },
@@ -307,114 +330,242 @@ var jamal = {
         }
         return loaded;
     },
+
+    /**
+     * Run this function to give control of the $j variable back
+     * to whichever library first implemented it. This helps to make 
+     * sure that jamal doesn't conflict with the $j object
+     * of other libraries.
+     *
+     * By using this function, you will only be able to access jamal
+     * using the 'jamal' variable. For example, where you used to do
+     * $j.json("/example/action"), you now must do jamal.json("/example/action").
+     *
+     * @example jamal.noConflict();
+     * // Do something with jamal
+     * jamal.json("/example/action");
+     * @desc Maps the original object that was referenced by $j back to $j
+     *
+     * @name noConflict
+     * @type undefined
+     * @cat core 
+     */
+    noConflict: function() {
+        if (jamal._$) {
+            $j = jamal._$j;
+        }
+        return jamal;
+    }
+};
+
+/**
+ * Extend one object with one or more others, returning the original,
+ * modified, object. This is a great utility for simple inheritance.
+ * 
+ * @example var settings = { validate: false, limit: 5, name: "foo" };
+ * var options = { validate: true, name: "bar" };
+ * jamal.extend(settings, options);
+ * @result settings == { validate: true, limit: 5, name: "bar" }
+ * @desc Merge settings and options, modifying settings
+ *
+ * @example var defaults = { validate: false, limit: 5, name: "foo" };
+ * var options = { validate: true, name: "bar" };
+ * var settings = jamal.extend({}, defaults, options);
+ * @result settings == { validate: true, limit: 5, name: "bar" }
+ * @desc Merge defaults and options, without modifying the defaults
+ *
+ * @name $.extend
+ * @param Object target The object to extend
+ * @param Object prop1 The object that will be merged into the first.
+ * @param Object propN (optional) More objects to merge into the first
+ * @type Object
+ * @cat JavaScript
+ */
+jamal.extend = jamal.fn.extend = function() {
+    // copy reference to target object
+    var target = arguments[0], a = 1;
+
+    // extend jamal itself if only one argument is passed
+    if (arguments.length == 1) {
+        target = this;
+        a = 0;
+    }
+    var prop;
+    while ((prop = arguments[a++]) != null) {
+        // Extend the base object
+        for (var i in prop) {
+            target[i] = prop[i];
+        }
+    }
+
+    // Return the modified object
+    return target;
+};
+
+/**
+ * Inherit from jamal mvc objects
+ * 
+ * @example jamal.inherit('m', {Foo:{}});
+ * @desc Merge jamal model with Foo and add the Foo model to jamal.m
+ *
+ * @example jamal.inherit('c', {Bars:{}});
+ * @desc Merge jamal controller with Bars and add the Bars controller to jamal.c
+ *
+ * @name jamal.inherit
+ * @param String type The type of the object (namely one of m, v or c).
+ * @param Object obj The object that will be inherited.
+ * @type Object
+ * @cat core
+ */
+jamal.inherit = jamal.fn.inherit = function(type, obj) {
+    if (type === 'm') {
+        var parent = 'model';
+    } else if(type === 'v') {
+        var parent = 'view';
+    } else if(type === 'c') {
+        var parent = 'controller';
+    }
+
+    for (var i in obj) {
+        jamal.extend(obj[i], jamal.fn[parent]);
+    }
+    jamal.extend(jamal.fn[type], obj);
+};
+
+jamal.fn.extend({
+    /**
+     * Jamal standard model
+     *
+     * @name jamal.model
+     * @type Object
+     * @cat core
+     */
+    model: {
+        /**
+         * A wrapper for jQuerys getJSON
+         *
+         * We need a wrapper here to add the global callback. Please use jamal.json
+         * in your controllers/models.
+         *
+         * @example jamal.json('/test/', 
+         *   function(response) {
+         *     jamal.dir(response.data);
+         *   });
+         *
+         * @public
+         * @name json
+         * @type json
+         * @param String url The URL of the page to load.
+         * @param Function callback A function to be executed whenever the data is loaded.
+         * @cat model
+         * @todo this method should be moved to a general jamal model class
+         */
+        json: function(url, callback) {
+            jQuery.getJSON(url, null, function(response) {
+                jamal.model.callback(response, callback);
+            });
+        },
     
-    /**
-     * Reloads the current page
-     *
-     * @example jamal.reload();
-     *
-     * @public
-     * @name reload
-     * @type jamal
-     * @cat session
-     */
-    reload: function() {
-        location.replace(location.href);
-    },
-
-    /**
-     * A wrapper for jQuerys getJSON
-     *
-     * We need a wrapper here to add the global callback. Please use jamal.json
-     * in your controllers/models.
-     *
-     * @example jamal.json('/test/', 
-     *   function(response) {
-     *     jamal.dir(response.data);
-     *   });
-     *
-     * @public
-     * @name json
-     * @type json
-     * @param String url The URL of the page to load.
-     * @param Function callback A function to be executed whenever the data is loaded.
-     * @cat model
-     * @todo this method should be moved to a general jamal model class
-     */
-    json: function(url, callback) {
-        jQuery.getJSON(url, null, function(response) {
-            jamal.callback(response, callback);
-        });
-    },
-
-    /**
-     * A general callback for the application
-     *
-     * If the server reports a session timeout jamal reloads the current
-     * page.
-     *
-     * Jamal expects a JSON response like 
-     * { 
-     *   session_timeout: false,
-     *   data: {}
-     * }
-     *
-     * @example jamal.callback(response, 
-     *   function(response){
-     *     jamal.dir(response.data)
-     *   });
-     *
-     * @public
-     * @name callback
-     * @type json
-     * @param Object response JSON response from the server.
-     * @param Function callback A function to be executed whenever the data is loaded.
-     * @cat model
-     * @todo this method should be moved to a general jamal model class
-     */
-    callback: function(response, callback){
-        if (response.session_timeout) {
-            // session timeout
-            jamal.reload();
-        } else {
+        /**
+         * A general callback for all the model
+         *
+         * Jamal expects a JSON response like 
+         * { 
+         *   data: {}
+         * }
+         *
+         * @example jamal.callback(response, 
+         *   function(response){
+         *     jamal.dir(response.data)
+         *   });
+         *
+         * @public
+         * @name callback
+         * @type json
+         * @param Object response JSON response from the server.
+         * @param Function callback A function to be executed whenever the data is loaded.
+         * @cat model
+         */
+        callback: function(response, callback){
             if (callback) {
                 callback(response);
             }
         }
     },
-    
-	/**
-	 * Run this function to give control of the $j variable back
-	 * to whichever library first implemented it. This helps to make 
-	 * sure that jamal doesn't conflict with the $j object
-	 * of other libraries.
-	 *
-	 * By using this function, you will only be able to access jamal
-	 * using the 'jamal' variable. For example, where you used to do
-	 * $j.json("/example/action"), you now must do jamal.json("/example/action").
-	 *
-	 * @example jamal.noConflict();
-	 * // Do something with jamal
-	 * jamal.json("/example/action");
-	 * @desc Maps the original object that was referenced by $j back to $j
-	 *
-	 * @name noConflict
-	 * @type undefined
-	 * @cat core 
-	 */
-	noConflict: function() {
-		if (jamal._$) {
-			$j = jamal._$j;
-        }
-		return jamal;
-	}
+    /**
+     * Jamal standard view
+     *
+     * @name jamal.view
+     * @type Object
+     * @cat core
+     */
+    view: {
+    },
+    /**
+     * Jamal standard controller
+     *
+     * @name jamal.controller
+     * @type Object
+     * @cat core
+     */
+    controller: {
+    }
+});
+
+/**
+ * Inherit a model from the jamal app model.
+ * 
+ * @example $j.m({Foo:{
+ *     getBar: function(){
+ *         $j.json('/test/', function(response){
+ *         });
+ *     }
+ * });
+ * @desc Merge model into jamal.m map and inherit everything from jamal.model
+ *
+ * @name $j.m
+ * @param Object model The model that will be merged into the model map.
+ * @type Object
+ * @cat core
+ */
+jamal.m = function(model) {
+    jamal.inherit('m', model);
 };
 
-// Map over the $j in case of overwrite
-if ( typeof $j != "undefined" ) {
-	jamal._$j = $j;
-}
+/**
+ * Inherit a view from the jamal app view.
+ * 
+ * @example $j.v({Foos:{
+ *     removeMessage: function(){
+ *         $('div.message').remove();
+ *     }
+ * });
+ * @desc Merge view into jamal.v map and inherit everything from jamal.view
+ *
+ * @name $j.v
+ * @param Object view The view that will be merged into the view map.
+ * @type Object
+ * @cat core
+ */
+jamal.v = function(view) {
+    jamal.inherit('v', view);
+};
 
-// Map the jamal namespace to '$j'
-var $j = jamal;
-
+/**
+ * Inherit a controller from the jamal app controller
+ * 
+ * @example $j.c({Foos:{
+ *     index: function(){
+ *         alert('hello world');
+ *     }
+ * });
+ * @desc Merge controller into jamal.c map and inherit everything from jamal.controller
+ *
+ * @name $j.m
+ * @param Object controller The controller that will be merged into the controller map.
+ * @type Object
+ * @cat core
+ */
+jamal.c = function(controller) {
+    jamal.inherit('c', controller);
+};

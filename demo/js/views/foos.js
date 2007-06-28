@@ -29,7 +29,7 @@
  *
  * This is a jamal sample view
  */
-$j.v.Foos = {
+$j.v({ Foos: {
     name: 'FoosView',
     
     showMoreContent: function(obj){
@@ -37,5 +37,6 @@ $j.v.Foos = {
         var content = $(obj).html();
         $(obj).html(content+content+content);
     }
-    
 }
+});
+

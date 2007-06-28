@@ -1,8 +1,6 @@
 /* SVN FILE: $Id$ */
 /**
- * Short description for file.
- *
- * This is a sample for jamal controller conventions
+ * This file handles the jamal object creation when the dom has finished.
  *
  * jQuery is required
  *
@@ -24,17 +22,27 @@
  * @license          http://www.opensource.org/licenses/mit-license.php The MIT License
  */
 
-/*
+/**
  * Jamal startup
  *
- * This file sets the document.ready() function which is a replacement for the 
- * windows.onload event. 
- */
- 
-/*
- * Window onload replacement of jquery
+ * Mapping jamal to the shorter $j namespace and register the onload event to
+ * create an instance of jamal.
  *
+ * This file sets the document.ready() function which is jQuery's replacement 
+ * for the windows.onload event. 
  */
-$(document).ready(function(){
-    $j.start();
+
+// Map over the $j in case of overwrite
+if (typeof $j != "undefined") {
+    jamal._$j = $j;
+}
+
+// Map the jamal namespace to '$j'
+var $j = jamal;
+ 
+/**
+ * Window onload replacement of jquery
+ */
+$(function(){
+    $j = jamal();
 });

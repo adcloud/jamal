@@ -30,7 +30,7 @@
  * This is a sample controller
  *
  */
-$j.c.Foos = {
+$j.c({Foos: {
     name: 'FoosController',
     
     /**
@@ -41,5 +41,5 @@ $j.c.Foos = {
             $j.v.Foos.showMoreContent($(this).parent());
         });
     }
-    
-};
+}
+});
