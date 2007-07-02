@@ -39,10 +39,12 @@ if (typeof $j != "undefined") {
 
 // Map the jamal namespace to '$j'
 var $j = jamal;
- 
+
 /**
  * Window onload replacement of jquery
+ *
  */
 $(function(){
-    $j = jamal();
-});
+    $j = jamal = jamal();
+    $j.start();
+}

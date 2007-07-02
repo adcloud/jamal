@@ -35,9 +35,9 @@
         <concat destfile="${DIST_DIR}/jamal.js">
             <fileset dir="${SRC_DIR}" includes="intro.js" />
             <fileset dir="${SRC_DIR}" includes="jamal.js" />
+            <fileset dir="${SRC_DIR}" includes="libs/*.js" />
+            <fileset dir="${SRC_DIR}" includes="components/*.js" />
             <fileset dir="${SRC_DIR}" includes="startup.js" />
-            <fileset dir="${SRC_DIR}" includes="components/session.js" />
-            <fileset dir="${SRC_DIR}" includes="components/modal.js" />
             <fileset dir="${SRC_DIR}" includes="plugins/*.js" />
             <fileset dir="${SRC_DIR}" includes="outro.js" />
         </concat>

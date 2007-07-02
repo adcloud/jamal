@@ -1,14 +1,8 @@
 /* SVN FILE: $Id: jamal.js 18 2007-06-13 09:07:32Z teemow $ */
 /**
- * Short description for file.
- *
- * This is the Jamal core. Heavily inspired by jQuery's architecture. 
- *
  * To quote Dave Cardwell: 
  * Built on the shoulders of giants:
  *   * John Resig      - http://jquery.com/
- *
- * jQuery is required
  *
  * Jamal :  Javascript MVC Assembly Layout <http://jamal-mvc.com/>
  * Copyright (c)    2007, Timo Derstappen <http://teemow.com/>
@@ -44,11 +38,11 @@ jamal.fn.extend({
 	 *
 	 * @private
 	 * @property
-	 * @name notification
+	 * @name active
 	 * @type Boolean
 	 * @cat modal
 	 */
-    notification: false,
+    active: false,
 
 	/**
      * Create a modal dialog
@@ -63,20 +57,21 @@ jamal.fn.extend({
 	 */
     modal: function(content) {
         if (content) {
-            if (!jamal.notification) {
+            if (!jamal.modal.active) {
                 // deactivate screen
-                $('body').css('overflow', 'hidden');
-                if ($.browser.msie) {
-                    $('select').hide();
+                jQuery('body').css('overflow', 'hidden');
+                if (jQuery.browser.msie) {
+                    jQuery('select').hide();
                 }
-                $('body').after('<div id="jamal_overlay"></div>')
+                jQuery('#wrapper')
+                         .after('<div id="jamal_overlay"></div>')
                          .prepend('<div id="jamal_modal"><div class="jamal_size">'+content+'</div></div>');
                 
-                jamal.notification = true;
+                jamal.modal.active = true;
             } else {
-                $('div.jamal_size').html(content);
+                jQuery('div.jamal_size').html(content);
             }
-            jamal.resize();
+            jamal.modal.resize();
             return true;
         } else {
             return false;
@@ -85,6 +80,17 @@ jamal.fn.extend({
 });
 
 jamal.fn.extend(jamal.fn.modal, {
+	/**
+	 * Flag for modal dialog
+	 *
+	 * @public
+	 * @property
+	 * @name jamal.modal.active
+	 * @type Boolean
+	 * @cat modal
+	 */
+    active: false,
+
 	/**
      * Resize the current modal dialog
 	 *
@@ -97,23 +103,23 @@ jamal.fn.extend(jamal.fn.modal, {
 	 */
     resize: function() {
         // width
-        $('#jamal_modal').css('width', $('div.jamal_size').width()+'px');
+        jQuery('#jamal_modal').css('width', jQuery('div.jamal_size').width()+'px');
         
-        var body = $('body').width();
-        var modal = $('#jamal_modal').width();
-        $('#jamal_modal').css('margin-left', (body/2-modal/2)+'px');
+        var body = jQuery('#wrapper').width();
+        var modal = jQuery('#jamal_modal').width();
+        jQuery('#jamal_modal').css('margin-left', (body/2-modal/2)+'px');
         
         // height
-        $('#jamal_modal').css('height', $('div.jamal_size').height()+'px');
-        if ($.browser.msie) {
+        jQuery('#jamal_modal').css('height', jQuery('div.jamal_size').height()+'px');
+        if (jQuery.browser.msie) {
             var offset = document.documentElement.scrollTop;
             body = document.documentElement.clientHeight;
         } else {
             var offset = window.pageYOffset;
             body = window.innerHeight;
         }
-        modal = $('#jamal_modal').height();
-        $('#jamal_modal').css('margin-top', (offset + body/2 - modal/2) +'px');
+        modal = jQuery('#jamal_modal').height();
+        jQuery('#jamal_modal').css('margin-top', (offset + body/2 - modal/2) +'px');
     },
     
 	/**
@@ -127,14 +133,14 @@ jamal.fn.extend(jamal.fn.modal, {
 	 * @cat modal
 	 */
     close: function() {
-        if (jamal.notification) {
-            $('#jamal_modal').fadeOut('slow');
-            $('#jamal_overlay').remove();
-            $('body').css('overflow', 'auto');
-            if ($.browser.msie) {
-                $('select').show();
+        if (jamal.modal.active) {
+            jQuery('#jamal_modal').fadeOut('slow');
+            jQuery('#jamal_overlay').remove();
+            jQuery('body').css('overflow', 'auto');
+            if (jQuery.browser.msie) {
+                jQuery('select').show();
             }
-            jamal.notification = false;
+            jamal.modal.active = false;
         }
     }
 });
