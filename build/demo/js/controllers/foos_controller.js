@@ -2,7 +2,7 @@
 /**
  * Short description for file.
  *
- * This is a sample for jamal model conventions
+ * This is a sample for jamal controller conventions
  *
  * jQuery is required
  *
@@ -16,20 +16,30 @@
  * @copyright        Copyright (c) 2006, Timo Derstappen
  * @link            
  * @package          jamal
- * @subpackage       jamal.models
+ * @subpackage       jamal.controllers
  * @since            Jamal v 0.1
  * @version          $Revision$
  * @modifiedby       $LastChangedBy$
  * @lastmodified     $Date$
  * @license          http://www.opensource.org/licenses/mit-license.php The MIT License
  */
- 
+
 /**
- * Foo Model
+ * FoosController
+ * 
+ * This is a sample controller
  *
- * This is a jamal sample model
  */
-$j.m.Foo = {
-    name: 'Foo'
+$j.c({Foos: {
+    name: 'FoosController',
     
+    /**
+     * Foo index
+     */
+    index: function() {
+        $('a').click(function(){
+            $j.v.Foos.showMoreContent($(this).parent());
+        });
+    }
 }
+});

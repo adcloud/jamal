@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="jamal" default="pack" basedir=".">
-    
+<project name="jamal" default="jamal" basedir=".">
+
+    <!--
+    - Using this build file to create your own custom application -
+
+    If you want to include jamal on your site with a certain set of mvc objects,
+    follow these steps to create your custom build:
+
+    1. Create a folder structure for model, view and controller
+    2. Modify the fileset to include all objects you want, 
+       eg. add controllers/*.js, models/*.js and views/*.js
+    3. Execute the standard jamal and packed targets to build your application
+
+    TODO Using this build file to create docs for a application
+    -->
+
     <!-- SETUP -->
 
-    <property name="SRC_DIR" value="../src" />
-    <property name="DIST_DIR" value="../dist" />
-    <property name="BUILD_DIR" value="build" />
+    <property description="Source Folder" name="SRC_DIR" value="../src" />
+    <property description="Files for parsing etc." name="BUILD_DIR" value="build" />
+    <property description="Folder for the demo appliation" name="DEMO_DIR" value="../demo" />
+    <property description="Folder for jamal and jamal_packed target" name="DIST_DIR" value="../dist" />
 
-    <property name="JS_COMPRESSOR" value="${BUILD_DIR}/js.jar" />
+    <property description="Rhino JS Engine" name="JS_COMPRESSOR" value="${BUILD_DIR}/js.jar" />
     
     <!-- MAIN -->
     <target name="folders" description="">
@@ -18,20 +33,33 @@
     <target name="pack" depends="folders" description="">
         <echo message="Packing application..." />
         <concat destfile="${DIST_DIR}/jamal.js">
+            <fileset dir="${SRC_DIR}" includes="intro.js" />
             <fileset dir="${SRC_DIR}" includes="jamal.js" />
-            <fileset dir="${SRC_DIR}" includes="plugins/*.js" />
-            <fileset dir="${SRC_DIR}" includes="controllers/*.js" />
-            <fileset dir="${SRC_DIR}" includes="models/*.js" />
-            <fileset dir="${SRC_DIR}" includes="views/*.js" />
+            <fileset dir="${SRC_DIR}" includes="libs/*.js" />
+            <fileset dir="${SRC_DIR}" includes="components/*.js" />
             <fileset dir="${SRC_DIR}" includes="startup.js" />
+            <fileset dir="${SRC_DIR}" includes="plugins/*.js" />
+            <fileset dir="${SRC_DIR}" includes="outro.js" />
         </concat>
         <java jar="${JS_COMPRESSOR}" fork="true">
             <arg value="${BUILD_DIR}/pack.js" />
             <arg value="${DIST_DIR}/jamal.js" />
             <arg value="${DIST_DIR}/jamal_packed.js" />
         </java>
-        <echo message="You now have a jamal application in ${DIST_DIR}." />
+    </target>
+
+    <target name="demo" depends="pack" description="">
+        <echo message="Building demo application..." />
+        <copy todir="${DEMO_DIR}">
+            <fileset dir="demo/" />
+        </copy>
+        <copy todir="${DEMO_DIR}/js/" file="${DIST_DIR}/jamal_packed.js" />
+    </target>
+    
+    <target name="jamal" depends="demo" description="">
+        <echo message="You now have jamal in ${DIST_DIR}." />
         <echo message="There is a readable version and a packed one." />
+        <echo message="In ${DEMO_DIR} you find an example application." />
         <echo message="Don't forget to add jQuery!" />
         <echo message="Done!" />
     </target>

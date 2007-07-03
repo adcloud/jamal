@@ -1,7 +1,5 @@
 /* SVN FILE: $Id$ */
 /**
- * Short description for file.
- *
  * This is the Jamal core. Heavily inspired by jQuery's architecture. 
  *
  * To quote Dave Cardwell: 
@@ -29,13 +27,30 @@
  */
 
 /**
- * Create the jamal Object
+ * Create a new jamal Object
+ *
+ * @constructor
+ * @private
+ * @name jamal
+ * @cat core
+ */
+var jamal = function() {
+    // If the context is global, return a new object
+    if (window == this) {
+        return new jamal();
+    }
+    
+    return this.configure();
+};
+
+/**
+ * Create the jamal core prototype
  *
  * @public
  * @name jamal
  * @cat core
  */
-var jamal = {
+jamal.fn = jamal.prototype = {
     /* Properties */
 
     /**
@@ -100,7 +115,7 @@ var jamal = {
      *
      * @public
      * @property
-     * @name models
+     * @name m
      * @type Map
      * @cat core
      */
@@ -111,7 +126,7 @@ var jamal = {
      *
      * @public
      * @property
-     * @name views
+     * @name v
      * @type Map
      * @cat core
      */
@@ -122,12 +137,23 @@ var jamal = {
      *
      * @public
      * @property
-     * @name controllers
+     * @name c
      * @type Map
      * @cat core
      */
     c: {},
-    
+
+    /**
+     * Jamal configuration passed from the root elements class
+     *
+     * @public
+     * @property
+     * @name config
+     * @type Object
+     * @cat core
+     */
+    config: {},
+
     /**
      * Debug flag to give more information about jamal in the console.
      *
@@ -145,7 +171,7 @@ var jamal = {
      * Method description
      *
      * @example jamal.start();
-     * @result jamal.controller == [ new Controller ]
+     * @result jamal.current == [ new Controller ]
      *
      * @public
      * @name start
@@ -153,21 +179,33 @@ var jamal = {
      * @cat core
      */
     start: function() {
-        if (this.configure()) {
-            this.log('Starting the Jamal application (Version: '+this.version+')...');
-            this.log('Controller: ' + this.name);
-            this.log('Action: ' + this.action);
-            if (this.debug === true) {
-                window.console.time('Timing');
-            }
-            this.load();
-            if (this.debug === true) {
-                window.console.timeEnd('Timing');
-            }
-            if (jQuery.browser.mozilla) {
-                this.log('Jamal size: '+this.toSource().length+' Chars');
-            }
+        this.log('Starting the Jamal application (Version: '+this.version+')...');
+        this.log('Controller: ' + this.name);
+        this.log('Action: ' + this.action);
+        if (this.debug === true) {
+            window.console.time('Timing');
         }
+        var started = this.load();
+        if (this.debug === true) {
+            window.console.timeEnd('Timing');
+        }
+        if (jQuery.browser.mozilla) {
+            this.log('Jamal size: '+this.toSource().length+' Chars');
+        }
+        
+        // capture errors
+        jQuery(window).error(function(message, file, line) {
+            var e = {'name':'window.onerror',
+                     'message':message,
+                     'file':file,
+                     'line':line,
+                     'stack':''
+                    };
+            jamal.fn.error('Window error captured!', e);
+            return true;
+        });
+                    
+        return started;
     },
 
     /**
@@ -208,13 +246,17 @@ var jamal = {
      * @cat log
      */
     error: function(message) {
-        this.log('Jamal Error: '+message);
-        if (arguments.length>1) {
-            e = arguments[1];
-            this.log(e.name+': '+e.message);
+        if (this.debug === true) {
+            window.console.error('Jamal Error: '+message);
+            if (arguments.length>1) {
+                e = arguments[1];
+                this.log(e.name+': '+e.message);
+                this.dir(e);
+                this.log('Stack: ' + e.stack);
+            }
         }
     },
-
+    
     /**
      * Log objects to the console
      *
@@ -267,6 +309,7 @@ var jamal = {
             this.error('No configuration found!');
             return false;
         } else {
+            this.config = data;
             this.name = data.controller;
             this.action = data.action;
             this.debug = data.debug;
@@ -287,11 +330,26 @@ var jamal = {
     load: function () {
         var loaded = false;
         if (typeof this.c[this.name] === 'object') {
+            
+            // controller
             try {
                 this.current = this.c[this.name];
             } catch(e) {
-                this.error('Controller Error!', e);
+                this.error('Controller error!', e);
             }
+            
+            // components
+            if(this.current.components) {
+                for(i in this.current.components) {
+                    try {
+                        this[this.current.components[i]]();
+                    } catch(e) {
+                        this.error(this.current.components[i]+' component error!', e);
+                    }
+                }
+            }
+            
+            // action
             if (typeof this.c[this.name][this.action] === 'function') {
                 try {
                     this.current[this.action]();
@@ -307,114 +365,75 @@ var jamal = {
         }
         return loaded;
     },
-    
-    /**
-     * Reloads the current page
-     *
-     * @example jamal.reload();
-     *
-     * @public
-     * @name reload
-     * @type jamal
-     * @cat session
-     */
-    reload: function() {
-        location.replace(location.href);
-    },
 
     /**
-     * A wrapper for jQuerys getJSON
+     * Run this function to give control of the $j variable back
+     * to whichever library first implemented it. This helps to make 
+     * sure that jamal doesn't conflict with the $j object
+     * of other libraries.
      *
-     * We need a wrapper here to add the global callback. Please use jamal.json
-     * in your controllers/models.
+     * By using this function, you will only be able to access jamal
+     * using the 'jamal' variable. For example, where you used to do
+     * $j.json("/example/action"), you now must do jamal.json("/example/action").
      *
-     * @example jamal.json('/test/', 
-     *   function(response) {
-     *     jamal.dir(response.data);
-     *   });
+     * @example jamal.noConflict();
+     * // Do something with jamal
+     * jamal.json("/example/action");
+     * @desc Maps the original object that was referenced by $j back to $j
      *
-     * @public
-     * @name json
-     * @type json
-     * @param String url The URL of the page to load.
-     * @param Function callback A function to be executed whenever the data is loaded.
-     * @cat model
-     * @todo this method should be moved to a general jamal model class
+     * @name noConflict
+     * @type undefined
+     * @cat core 
      */
-    json: function(url, callback) {
-        jQuery.getJSON(url, null, function(response) {
-            jamal.callback(response, callback);
-        });
-    },
-
-    /**
-     * A general callback for the application
-     *
-     * If the server reports a session timeout jamal reloads the current
-     * page.
-     *
-     * Jamal expects a JSON response like 
-     * { 
-     *   session_timeout: false,
-     *   data: {}
-     * }
-     *
-     * @example jamal.callback(response, 
-     *   function(response){
-     *     jamal.dir(response.data)
-     *   });
-     *
-     * @public
-     * @name callback
-     * @type json
-     * @param Object response JSON response from the server.
-     * @param Function callback A function to be executed whenever the data is loaded.
-     * @cat model
-     * @todo this method should be moved to a general jamal model class
-     */
-    callback: function(response, callback){
-        if (response.session_timeout) {
-            // session timeout
-            jamal.reload();
-        } else {
-            if (callback) {
-                callback(response);
-            }
+    noConflict: function() {
+        if (jamal._$) {
+            $j = jamal._$j;
         }
-    },
-    
-	/**
-	 * Run this function to give control of the $j variable back
-	 * to whichever library first implemented it. This helps to make 
-	 * sure that jamal doesn't conflict with the $j object
-	 * of other libraries.
-	 *
-	 * By using this function, you will only be able to access jamal
-	 * using the 'jamal' variable. For example, where you used to do
-	 * $j.json("/example/action"), you now must do jamal.json("/example/action").
-	 *
-	 * @example jamal.noConflict();
-	 * // Do something with jamal
-	 * jamal.json("/example/action");
-	 * @desc Maps the original object that was referenced by $j back to $j
-	 *
-	 * @name noConflict
-	 * @type undefined
-	 * @cat core 
-	 */
-	noConflict: function() {
-		if (jamal._$) {
-			$j = jamal._$j;
-        }
-		return jamal;
-	}
+        return jamal;
+    }
 };
 
-// Map over the $j in case of overwrite
-if ( typeof $j != "undefined" ) {
-	jamal._$j = $j;
-}
+/**
+ * Extend one object with one or more others, returning the original,
+ * modified, object. This is a great utility for simple inheritance.
+ * 
+ * @example var settings = { validate: false, limit: 5, name: "foo" };
+ * var options = { validate: true, name: "bar" };
+ * jamal.extend(settings, options);
+ * @result settings == { validate: true, limit: 5, name: "bar" }
+ * @desc Merge settings and options, modifying settings
+ *
+ * @example var defaults = { validate: false, limit: 5, name: "foo" };
+ * var options = { validate: true, name: "bar" };
+ * var settings = jamal.extend({}, defaults, options);
+ * @result settings == { validate: true, limit: 5, name: "bar" }
+ * @desc Merge defaults and options, without modifying the defaults
+ *
+ * @name $.extend
+ * @param Object target The object to extend
+ * @param Object prop1 The object that will be merged into the first.
+ * @param Object propN (optional) More objects to merge into the first
+ * @type Object
+ * @cat JavaScript
+ */
+jamal.extend = jamal.fn.extend = function() {
+    // copy reference to target object
+    var target = arguments[0], a = 1;
 
-// Map the jamal namespace to '$j'
-var $j = jamal;
+    // extend jamal itself if only one argument is passed
+    if (arguments.length == 1) {
+        target = this;
+        a = 0;
+    }
+    var prop;
+    while ((prop = arguments[a++]) != null) {
+        // Extend the base object
+        for (var i in prop) {
+            target[i] = prop[i];
+        }
+    }
+
+    // Return the modified object
+    return target;
+};
 

@@ -29,13 +29,12 @@
  *
  * This is a jamal sample view
  */
-$j.v.Foos = {
-    name: 'FoosView',
-    
+$j.v({ Foos: {
     showMoreContent: function(obj){
         $(obj).find('a').remove();
         var content = $(obj).html();
         $(obj).html(content+content+content);
     }
-    
 }
+});
+
