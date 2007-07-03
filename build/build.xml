@@ -51,9 +51,9 @@
     <target name="demo" depends="pack" description="">
         <echo message="Building demo application..." />
         <copy todir="${DEMO_DIR}">
-            <fileset dir="${BUILD_DIR}/demo/" />
+            <fileset dir="demo/" />
         </copy>
-        <copy todir="${DEMO_DIR}/js/" file="${DIST_DIR}/jamal.js" />
+        <copy todir="${DEMO_DIR}/js/" file="${DIST_DIR}/jamal_packed.js" />
     </target>
     
     <target name="jamal" depends="demo" description="">

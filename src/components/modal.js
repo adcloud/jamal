@@ -33,17 +33,6 @@
  * @cat modal
  */
 jamal.fn.extend({
-     /**
-	 * Flag to indicate if there is currently a notification on the user screen.
-	 *
-	 * @private
-	 * @property
-	 * @name active
-	 * @type Boolean
-	 * @cat modal
-	 */
-    active: false,
-
 	/**
      * Create a modal dialog
 	 *

@@ -47,4 +47,4 @@ var $j = jamal;
 $(function(){
     $j = jamal = jamal();
     $j.start();
-}
+});
