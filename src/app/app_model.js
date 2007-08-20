@@ -14,7 +14,7 @@
  * @copyright        Copyright (c) 2007, Timo Derstappen
  * @link            
  * @package          jamal
- * @subpackage       jamal.session
+ * @subpackage       jamal.model
  * @since            Jamal v 0.4
  * @version          $Revision$
  * @modifiedby       $LastChangedBy$

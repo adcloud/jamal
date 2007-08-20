@@ -33,13 +33,17 @@
     <target name="pack" depends="folders" description="">
         <echo message="Packing application..." />
         <concat destfile="${DIST_DIR}/jamal.js">
-            <fileset dir="${SRC_DIR}" includes="intro.js" />
-            <fileset dir="${SRC_DIR}" includes="jamal.js" />
-            <fileset dir="${SRC_DIR}" includes="libs/*.js" />
-            <fileset dir="${SRC_DIR}" includes="components/*.js" />
-            <fileset dir="${SRC_DIR}" includes="startup.js" />
-            <fileset dir="${SRC_DIR}" includes="plugins/*.js" />
-            <fileset dir="${SRC_DIR}" includes="outro.js" />
+            <fileset dir="${SRC_DIR}" includes="jamal/intro.js" />
+            <fileset dir="${SRC_DIR}" includes="jamal/jamal.js" />
+            <fileset dir="${SRC_DIR}" includes="jamal/libs/*.js" />
+            <fileset dir="${SRC_DIR}" includes="jamal/components/*.js" />
+            <fileset dir="${SRC_DIR}" includes="jamal/startup.js" />
+            <fileset dir="${SRC_DIR}" includes="jamal/plugins/*.js" />
+            <fileset dir="${SRC_DIR}" includes="jamal/outro.js" />
+            <fileset dir="${SRC_DIR}" includes="app/*.js" />
+            <fileset dir="${SRC_DIR}" includes="app/models/*.js" />
+            <fileset dir="${SRC_DIR}" includes="app/views/*.js" />
+            <fileset dir="${SRC_DIR}" includes="app/controllers/*.js" />
         </concat>
         <java jar="${JS_COMPRESSOR}" fork="true">
             <arg value="${BUILD_DIR}/pack.js" />

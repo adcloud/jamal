@@ -14,7 +14,7 @@
  * @copyright        Copyright (c) 2007, Timo Derstappen
  * @link            
  * @package          jamal
- * @subpackage       jamal.session
+ * @subpackage       jamal.view
  * @since            Jamal v 0.4
  * @version          $Revision$
  * @modifiedby       $LastChangedBy$
@@ -23,17 +23,10 @@
  */
 
 /**
- * Jamal app controller
+ * Jamal app view
  *
  * @public
- * @cat controller
+ * @cat view
  */
-jamal.extend(jamal.fn.c.prototype, {
-    components: ['session', 'modal', 'remote_debug'],
-    
-    beforeAction: function() {
-    },
-    afterAction: function() {
-    }
-    
+jamal.extend(jamal.fn.v.prototype, {
 });

@@ -14,7 +14,7 @@
  * @copyright        Copyright (c) 2007, Timo Derstappen
  * @link            
  * @package          jamal
- * @subpackage       jamal.session
+ * @subpackage       jamal.controller
  * @since            Jamal v 0.4
  * @version          $Revision$
  * @modifiedby       $LastChangedBy$
@@ -23,27 +23,17 @@
  */
 
 /**
- * Jamal app view
+ * Jamal app controller
  *
  * @public
- * @cat view
+ * @cat controller
  */
-jamal.extend(jamal.fn.v.prototype, {
-    /**
-     * Add an error message
-     *
-     * @name addError
-     * @param String message The error message that should be displayed
-     * @param Mixed obj Element / jQuery object / css selector of an dom element which should contain the error message
-     */
-    addError: function(message) {
-        if (arguments.length>1) {
-            obj = arguments[1];
-        } else {
-            obj = $('tr.edit>td');
-        }
-        $('div.error', obj).remove();
-        $(obj).prepend(message);
-        $('div.error', obj).show();
+jamal.extend(jamal.fn.c.prototype, {
+    components: ['session', 'modal'],
+    
+    beforeAction: function() {
+    },
+    afterAction: function() {
     }
+    
 });
