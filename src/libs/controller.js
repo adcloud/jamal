@@ -80,6 +80,30 @@ jamal.c = jamal.fn.c = function(controller) {
 
 jamal.fn.extend(jamal.fn.c.prototype, {
     /**
+     * Callback which get called before an action
+     *
+     * Overwrite this method in your own (app)controller
+     *
+     * @public
+     * @name beforeAction
+     * @cat controller
+     */
+    beforeAction: function(){
+    },
+
+    /**
+     * Callback which get called after an action
+     *
+     * Overwrite this method in your own (app)controller
+     *
+     * @public
+     * @name beforeAction
+     * @cat controller
+     */
+    afterAction: function(){
+    },
+
+    /**
      * (Re-)Initialize a controller
      *
      * @example jamal.controller.init()
