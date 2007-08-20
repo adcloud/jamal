@@ -165,6 +165,17 @@ jamal.fn = jamal.prototype = {
      */
     debug: false,
 
+    /**
+     * Jamal events
+     *
+     * @public
+     * @property
+     * @name events
+     * @type Object
+     * @cat core
+     */
+    events: {},
+
     /* Methods */
     
     /**
@@ -180,6 +191,8 @@ jamal.fn = jamal.prototype = {
      */
     start: function() {
         this.log('Starting the Jamal application (Version: '+this.version+')...');
+        this.log('Browser:');
+        this.dir(jQuery.browser);
         this.log('Controller: ' + this.name);
         this.log('Action: ' + this.action);
         if (this.debug === true) {
@@ -247,12 +260,14 @@ jamal.fn = jamal.prototype = {
      */
     error: function(message) {
         if (this.debug === true) {
-            window.console.error('Jamal Error: '+message);
             if (arguments.length>1) {
                 e = arguments[1];
+                window.console.error('Jamal Error: '+message, e);
                 this.log(e.name+': '+e.message);
                 this.dir(e);
                 this.log('Stack: ' + e.stack);
+            } else {
+                window.console.error('Jamal Error: '+message);
             }
         }
     },
@@ -297,7 +312,7 @@ jamal.fn = jamal.prototype = {
      */
     configure: function() {
         try {
-            data = jQuery(this.root+'.jamal').data();
+            var data = jQuery(this.root+'.jamal').data();
         } catch(e) {
             this.debug = true;
             this.error('jQuery Metadata Plugin failed to read the configuration. '+
@@ -338,9 +353,12 @@ jamal.fn = jamal.prototype = {
                 this.error('Controller error!', e);
             }
             
+            // callback before the action
+            this.current.beforeAction();
+            
             // components
             if(this.current.components) {
-                for(i in this.current.components) {
+                for(var i in this.current.components) {
                     try {
                         this[this.current.components[i]]();
                     } catch(e) {
@@ -360,6 +378,9 @@ jamal.fn = jamal.prototype = {
             } else {
                 this.log('Action not found!');
             }
+            
+            // callback after the action
+            this.current.afterAction();
         } else {
             this.log('Controller not found!');
         }
