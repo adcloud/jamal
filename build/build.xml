@@ -19,15 +19,19 @@
 
     <property description="Source Folder" name="SRC_DIR" value="../src" />
     <property description="Files for parsing etc." name="BUILD_DIR" value="build" />
-    <property description="Folder for the demo appliation" name="DEMO_DIR" value="../demo" />
+    <property description="Files for testing" name="TEST_DIR" value="../test" />
+    <property description="Folder for the demo application" name="DEMO_DIR" value="../demo" />
     <property description="Folder for jamal and jamal_packed target" name="DIST_DIR" value="../dist" />
 
-    <property description="Rhino JS Engine" name="JS_COMPRESSOR" value="${BUILD_DIR}/js.jar" />
+    <property description="Rhino JS Engine" name="RHINO" value="${BUILD_DIR}/js.jar" />
+    <property description="Dean Edwards Packer" name="PACKER" value="${BUILD_DIR}/pack.js" />
     
     <!-- MAIN -->
     <target name="folders" description="">
         <delete dir="${DIST_DIR}" quiet="true" />
         <mkdir dir="${DIST_DIR}" />
+        <delete dir="${TEST_DIR}" quiet="true" />
+        <mkdir dir="${TEST_DIR}" />
     </target>
     
     <target name="pack" depends="folders" description="">
@@ -45,14 +49,42 @@
             <fileset dir="${SRC_DIR}" includes="app/views/*.js" />
             <fileset dir="${SRC_DIR}" includes="app/controllers/*.js" />
         </concat>
-        <java jar="${JS_COMPRESSOR}" fork="true">
-            <arg value="${BUILD_DIR}/pack.js" />
+        <java jar="${RHINO}" fork="true">
+            <arg value="${PACKER}" />
             <arg value="${DIST_DIR}/jamal.js" />
             <arg value="${DIST_DIR}/jamal_packed.js" />
         </java>
     </target>
 
-    <target name="demo" depends="pack" description="">
+    <target name="test" depends="pack" description="">
+        <copy todir="${TEST_DIR}">
+            <fileset dir="test/" />
+        </copy>
+        <copy todir="${TEST_DIR}" file="demo/index.html" />
+        <copy todir="${TEST_DIR}" file="demo/js/jquery.js" />
+        <copy todir="${TEST_DIR}" file="${DIST_DIR}/jamal_packed.js" />
+        <echo message="Run jamal in rhino" />
+        <java jar="${RHINO}" fork="true" errorproperty="RHINO_ERROR">
+	        <arg line="${TEST_DIR}/run_app.js" /> 
+	        <arg line="${TEST_DIR}/" /> 
+	        <arg line="index" /> 
+		</java>
+        <condition property="HAS_ERRORS">
+            <contains string="${RHINO_ERROR}" substring="Exception" />
+        </condition>
+    </target>
+
+    <target name="test_abort" depends="test" if="HAS_ERRORS">
+        <echo message="Error:" />
+        <echo message="${RHINO_ERROR}" />
+        <fail message="Failed! Aborting..." />
+    </target>
+
+    <target name="test_success" depends="test" unless="HAS_ERRORS">
+        <echo message="Success!" />
+    </target>
+    
+    <target name="demo" depends="test_abort,test_success" description="">
         <echo message="Building demo application..." />
         <copy todir="${DEMO_DIR}">
             <fileset dir="demo/" />
