@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <title>Jamal on AIR Demo</title>
+        
+		<link rel="author" href="mailto:teemow@gmail.com" title="Timo Derstappen" rev="made" />
+		<link rel="copyright" href="http://teemow.com/imprint" title="Copyright &amp; Impressum" />
+		
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="content-script-type" content="text/javascript" />
+		<!-- AIR specific -->
+		<script src="js/AIRAliases.js" type="text/javascript"></script>
+		<script src="js/vendors/firebug/firebug.js" type="text/javascript"></script>
+		<!-- JAMAL specific -->
+        <script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript" src="js/jamal/jamal_packed.js"></script>
+
+        <script type="text/javascript" src="js/app/app_model.js"></script>
+        <script type="text/javascript" src="js/app/app_view.js"></script>
+        <script type="text/javascript" src="js/app/app_controller.js"></script>
+        
+        <script type="text/javascript" src="js/app/models/foo.js"></script>
+        <script type="text/javascript" src="js/app/views/foos.js"></script>
+        <script type="text/javascript" src="js/app/controllers/bars_controller.js"></script>
+        <script type="text/javascript" src="js/app/controllers/foos_controller.js"></script>
+        
+        <style>
+            p {
+                width: 400px;
+            }
+        </style>
+    </head>
+    <body class="jamal {controller:'Foos',action:'index',debug:true}">
+        <h1>Some dummy content</h1>
+        <p>
+            Some dummy content. Some dummy content. Some dummy content.
+            Some dummy content. Some dummy content. Some dummy content.
+            Some dummy content. Some dummy content. Some dummy content.
+            <a href="#">More</a>
+        </p>
+		
+		<p>Pleas hit F12 to see the Firebug lite console</p>
+    </body>
+</html>

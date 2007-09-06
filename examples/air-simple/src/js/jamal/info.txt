@@ -1,0 +1,3 @@
+Here would normally be the jamal core code.
+
+But since this is just a simple demo i provided you with the packed version of the core framework.
