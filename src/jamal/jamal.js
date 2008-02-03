@@ -214,7 +214,11 @@ jamal.fn = jamal.prototype = {
                      'line':line,
                      'stack':''
                     };
-            jamal.fn.error('Window error captured!', e);
+            if(jamal.fn === undefined) {
+                $j.error('Window error captured!', e);
+            } else {
+                jamal.fn.error('Window error captured!', e);
+            }
             return true;
         });
                     
@@ -263,7 +267,12 @@ jamal.fn = jamal.prototype = {
             if (arguments.length>1) {
                 e = arguments[1];
                 window.console.error('Jamal Error: '+message, e);
-                this.log(e.name+': '+e.message);
+                if(typeof e.message === "object") {
+                    this.log(e.name+': ');
+                    this.dir(e.message);
+                } else {
+                    this.log(e.name+': '+e.message);
+                }
                 this.dir(e);
                 this.log('Stack: ' + e.stack);
             } else {
