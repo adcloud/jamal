@@ -44,10 +44,12 @@
             <fileset dir="${SRC_DIR}" includes="jamal/startup.js" />
             <fileset dir="${SRC_DIR}" includes="jamal/plugins/*.js" />
             <fileset dir="${SRC_DIR}" includes="jamal/outro.js" />
+            <!--
             <fileset dir="${SRC_DIR}" includes="app/*.js" />
             <fileset dir="${SRC_DIR}" includes="app/models/*.js" />
             <fileset dir="${SRC_DIR}" includes="app/views/*.js" />
             <fileset dir="${SRC_DIR}" includes="app/controllers/*.js" />
+            -->
         </concat>
         <java jar="${RHINO}" fork="true">
             <arg value="${PACKER}" />

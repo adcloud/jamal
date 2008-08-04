@@ -66,43 +66,21 @@ jamal.m = jamal.fn.m = function(model) {
 
 jamal.fn.extend(jamal.fn.m.prototype, {
     /**
-     * A wrapper for jQuerys ajax
+     * Basic ajax settings for a model
      *
-     * We need a wrapper here to add the global callback. Please use jamal.json
-     * in your controllers/models.
-     *
-     * @example jamal.model.json('/test/', 
-     *   function(response) {
-     *     jamal.dir(response.data);
-     *   });
-     *
-     * @public
-     * @name json
-     * @param String url The URL of the page to load.
-     * @param Function callback A function to be executed whenever the data is loaded.
-     * @cat model
-     * @todo this method should be moved to a general jamal model class
+     * @private
+     * @name settings
      */
-    json: function(url, callback) {
-        var model = this;
-        
-        var settings = {
-            type: 'GET',
+    settings: function(){
+        return {
             dataType: 'json',
-            url: url,
-            beforeSend: function(xhr){
-                jamal.ajaxSend(xhr);
-                return model.beforeSend();
-            },
             error: function(xhr, type, exception){
                 if(model.error()) {
                     jamal.error('Ajax error: ' + type, exception);
                 }
             },
-            complete: function(xhr, result){
-                model.complete(xhr, result);
-            },
             success: function(response) {
+                response = this.callback(response);
                 jamal.ajaxSuccess(response);
                 if(model.callback(response)) {
                     if(callback) {
@@ -111,92 +89,225 @@ jamal.fn.extend(jamal.fn.m.prototype, {
                 }
             }
         };
-        
-        jQuery.ajax(settings);
     },
     
     /**
-     * A wrapper for jQuerys getJSON
+     * Get a models url
      *
-     * We need a wrapper here to add the global callback. Please use jamal.json
-     * in your controllers/models.
+     * @private
+     * @name getUrl
+     * @cat model
+     */
+    getUrl: function() {
+        return '/' + jamal.Inflector.pluralize(this.name) + '/' + this.id;
+    },
+    
+    /**
+     * Gets a model
      *
-     * @example jamal.model.json('/test/', 
+     * @example jamal.model.json( 
+     *   function(response) {
+     *     jamal.dir(response.data);
+     *   }
+     * );
+     *
+     * @public
+     * @name find
+     * @param int id Id of the model
+     * @param Function callback A function to be executed whenever the data is loaded.
+     * @cat model
+     */
+    find: function(id, callback) {
+        var model = this;
+        model.id = id;
+        var settings = this.settings();
+
+        settings.type = 'GET';
+        settings.url = this.getUrl();
+        
+        settings.beforeSend = function(xhr) {
+            jamal.ajaxSend(xhr);
+            return model.beforeFind();
+        };
+        
+        settings.callback = function(result) {
+            model.afterFind(result);
+        };
+        
+        jQuery.ajax(settings);
+    },
+    /**
+     * Backwards compatibility
+     *
+     * @public
+     * @deprecated
+     * @name json
+     * @param int id Id of the model
+     * @param Function callback A function to be executed whenever the data is loaded.
+     */
+    json: this.read,
+    
+    /**
+     * Saves a model
+     *
+     * @example jamal.model.save(1, {name: 'John', lastname:'Doe'}, 
      *   function(response) {
      *     jamal.dir(response.data);
      *   });
      *
      * @public
-     * @name json
-     * @param String url The URL of the page to load.
+     * @name save
+     * @param int id Id of the model
+     * @param object data Data that should be saved
      * @param Function callback A function to be executed whenever the data is loaded.
      * @cat model
-     * @todo this method should be moved to a general jamal model class
      */
-    post: function(url, data, callback) {
+    save: function(id, data, callback) {
         var model = this;
+        model.id = id;
+        model.data = data;
+        var settings = this.settings();
         
-        var settings = {
-            type: 'POST',
-            dataType: 'json',
-            url: url,
-            data: data,
-            beforeSend: function(xhr){
-                jamal.ajaxSend(xhr);
-                return model.beforeSend();
-            },
-            error: function(xhr, type, exception){
-                if(model.error()) {
-                    jamal.error('Ajax error: ' + type, exception);
-                }
-            },
-            complete: function(xhr, result){
-                model.complete(xhr, result);
-            },
-            success: function(response) {
-                jamal.ajaxSuccess(response);
-                if(model.callback(response)) {
-                    if(callback) {
-                        callback(response);
-                    }
-                }
-            }
+        settings.type = 'POST';
+        settings.url = this.getUrl();
+        
+        settings.beforeSend = function(xhr) {
+            jamal.ajaxSend(xhr);
+            this.data = model.beforeSave(model.data);
+            return this.data;
+        };
+        
+        settings.callback = function(result) {
+            model.afterSave(result);
         };
         
         jQuery.ajax(settings);
     },    
+    /**
+     * Backwards compatibility
+     *
+     * @deprecated
+     * @public
+     * @name post
+     * @param String url The URL of the page to load.
+     * @param Function callback A function to be executed whenever the data is loaded.
+     * @cat model
+     */
+    post: this.save,
     
     /**
-     * A pre-callback to modify the XMLHttpRequest object before it is sent. 
-     * Use this to set custom headers etc. The XMLHttpRequest is passed as the 
-     * only argument.
+     * Deletes a model
+     * 
+     * @example jamal.model.json('/test/', 
+     *   function(response) {
+     *     jamal.dir(response.data);
+     *   });
+     *
+     * @public
+     * @name delete
+     * @param int id Id of the model
+     * @param Function callback A function to be executed whenever the model is delete.
+     * @cat model
+     */
+    delete: function(id, callback) {
+        var model = this;
+        model.id = id;
+        var settings = this.settings();
+        
+        settings.type = 'DELETE';
+        settings.url = this.getUrl();
+        
+        settings.beforeSend = function(xhr) {
+            jamal.ajaxSend(xhr);
+            return model.beforeDelete();
+        };
+        
+        settings.callback = function(result) {
+            model.afterDelete(result);
+        };
+        
+        jQuery.ajax(settings);
+    },    
+
+    /**
+     * Callback to modify the data which should be saved
      *
      * Overwrite this method in your own (app)model
      *
      * @public
-     * @name beforeSend
+     * @name beforeSave
+     * @param object data
      * @cat model
      */
-    beforeSend: function(xhr){
-        return true;
+    beforeSave: function(data){
+        return data;
     },
     
     /**
-     * A function to be called when the request finishes (after success and 
-     * error callbacks are executed). The function gets passed two arguments: 
-     * The XMLHttpRequest object and a string describing the type of success 
-     * of the request. 
+     * Callback before an object is requested
      *
      * Overwrite this method in your own (app)model
      *
      * @public
-     * @name complete
+     * @name beforeFind
      * @cat model
      */
-    complete: function(xhr, result){
+    beforeFind: function(){
         return true;
     },
-    
+
+    /**
+     * Callback before an object is deleted
+     *
+     * Overwrite this method in your own (app)model
+     *
+     * @public
+     * @name beforeDelete
+     * @cat model
+     */
+    beforeDelete: function(){
+        return true;
+    },
+
+    /**
+     * Callback after data was saved
+     *
+     * Overwrite this method in your own (app)model
+     *
+     * @public
+     * @name afterSave
+     * @cat model
+     */
+    afterSave: function(result){
+        return result;
+    },
+
+    /**
+     * Callback after data was retrieved
+     *
+     * Overwrite this method in your own (app)model
+     *
+     * @public
+     * @name afterSave
+     * @cat model
+     */
+    afterFind: function(result){
+        return result;
+    },
+
+    /**
+     * Callback after an model was deleted
+     *
+     * Overwrite this method in your own (app)model
+     *
+     * @public
+     * @name afterDelete
+     * @cat model
+     */
+    afterDelete: function(result){
+        return result;
+    },
+
     /**
      * A function to be called if the request fails. The function gets passed 
      * three arguments: The XMLHttpRequest object, a string describing the type 
