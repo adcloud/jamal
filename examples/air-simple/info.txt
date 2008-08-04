@@ -1,0 +1,10 @@
+Very basic example of Adobe Air integration if you wish to programm an html / JS based AIR software
+This uses the sample code provided with jamal
+
+scr - contains the raw version of the Adobe Air integration demo
+
+build - contains the AIR install file
+
+
+If you are using aptana, you can start the app with the build in AIR support. 
+Please refer to the Aptana docs for the How to´s .. its really simple and a must have!

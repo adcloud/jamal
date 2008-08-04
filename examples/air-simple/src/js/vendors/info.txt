@@ -1,0 +1,3 @@
+You put 3rd party js code in here.
+
+currently only the firebug lite is present because AIR does not provide any JS debug console.

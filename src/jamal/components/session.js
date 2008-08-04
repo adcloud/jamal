@@ -43,17 +43,35 @@ jamal.fn.extend({
 	 * @type Object
 	 * @cat session
 	 */
-     session: function(){
-         if(this.config.session) {
-             this.log('Session activated');
-             this.session.active = true;
-             this.session.since = 0;
-             this.session.check();
-             
-             return true;
-         }
-         return false;
-     }
+    session: function(){
+        if(this.config.session) {
+            this.log('Session activated');
+            this.session.active = true;
+            this.session.since = 0;
+            
+            jamal.ajaxSend(function(xhr){
+                if(jamal.session.active){
+                    jamal.session.reset();
+                }
+            });
+            
+            jamal.ajaxSuccess(function(e, response){
+                if(jamal.session.active){
+                    if(response.session_timeout) {
+                        // session timeout
+                        jamal.session.reload();
+                    } else {
+                        jamal.session.reset();
+                    }
+                }
+            });
+            
+            this.session.check();
+            
+            return true;
+        }
+        return false;
+    }
 }); 
 
 jamal.fn.extend(jamal.fn.session, {
@@ -115,7 +133,20 @@ jamal.fn.extend(jamal.fn.session, {
     check: function() {
         if (this.since < this.timeout) {
             if (this.since > 0) {
-                jamal.current.m.json('/session/');
+                
+                var settings = {
+                    url: '/session/',
+                    type: 'GET',
+                    dataType: 'json',
+                    global: 'false',
+                    success: function(response) {
+                        if(jamal.session.active && response.session_timeout) {
+                            jamal.session.destroy();
+                        }
+                    }
+                };
+                
+                jQuery.ajax(settings);
             }
             this.since += this.freq/60;
             window.setTimeout("jamal.session.check();", this.freq*1000);
@@ -139,17 +170,25 @@ jamal.fn.extend(jamal.fn.session, {
 	 * @cat session
 	 */
     destroy: function() {
-        jamal.current.m.json('/logout/', function(response) {
-            jamal.session.active = false;
-            jamal.log('Session killed');
-            
-            if (response.redirect) {
-                jamal.session.redirect();
+        this.active = false;
+        jamal.log('Session killed');
+        
+        var settings = {
+            url: '/logout/',
+            type: 'GET',
+            dataType: 'json',
+            global: 'false',
+            success: function(response) {
+                if (response.redirect) {
+                    jamal.session.redirect();
+                }
+                
+                jamal.modal(response.content);
+                jamal.session.callback();
             }
-            
-            jamal.modal(response.content);
-            jamal.session._callback();
-        });
+        };
+
+        jQuery.ajax(settings);
     },
     
     /**
@@ -167,7 +206,7 @@ jamal.fn.extend(jamal.fn.session, {
      * @type Function
      * @cat session
      */
-    _callback: function() {
+    callback: function() {
         return;
     },
      
@@ -186,42 +225,6 @@ jamal.fn.extend(jamal.fn.session, {
         window.location.replace(window.location.href);
     },
     
-    /**
-     * The session callback for the server communication
-     *
-     * If the server reports a session timeout jamal reloads the current
-     * page.
-     *
-     * Jamal expects a JSON response like 
-     * { 
-     *   session: false,
-     *   data: {}
-     * }
-     *
-     * @example jamal.callback(response, 
-     *   function(response){
-     *     jamal.dir(response.data)
-     *   });
-     *
-     * @public
-     * @name _callback
-     * @type session
-     * @param Object response JSON response from the server.
-     * @param Function callback A function to be executed whenever the data is loaded.
-     * @cat model
-     */
-    callback: function(response, callback){
-        if (!response.session) {
-            // session timeout
-            this.reload();
-        } else {
-            this.reset();
-            if (callback) {
-                callback(response);
-            }
-        }
-    },
-
 	/**
      * Reset jamal's session timer
 	 *

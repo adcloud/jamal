@@ -62,6 +62,72 @@ jamal.v = jamal.fn.v = function(view) {
 
 jamal.fn.extend(jamal.fn.v.prototype, {
     /**
+     * Add a spinner to an element
+     * 
+     * @name addSpinner
+     * @param Mixed obj Element / jQuery object / css selector of an dom element which should contain the spinner
+     * @cat view
+     */
+    addSpinner: function(obj) {
+        // create spinner
+        var spinner;
+        try {
+            spinner = document.createElement('div');
+            spinner.className = 'spinner';
+        } catch( ex ) {
+            jamal.error( 'Cannot create <' + tag + '> element:\n' +
+                args.toSource() + '\n' + args );
+            spinner = null;
+        }
+        $(obj).prepend(spinner);
+    },
+    
+    /**
+     * Remove all spinner
+     * 
+     * @name removeSpinner
+     * @cat view
+     */
+    removeSpinner: function() {
+        $('div.spinner').remove();
+    },
+    
+    /**
+     * Add a (success) message at the top of the current page
+     * 
+     * @name addMessage
+     * @param String message The message that should be displayed
+     * @cat view
+     */
+    addMessage: function(message){
+        $('#content').prepend(message);
+    },
+    
+    /**
+     * Remove all messages and errors
+     *
+     * @name removeMessages
+     * @cat view
+     */
+    removeMessages: function() {
+        $('div.error').remove();
+        $('div.message').remove();
+    },
+    
+    /**
+     * Add an error message
+     *
+     * @name addError
+     * @param String message The error message that should be displayed
+     * @param Mixed obj Element / jQuery object / css selector of an dom element which should contain the error message
+     */
+    addError: function(message, obj) {
+        $('div.error', obj).remove();
+        $(obj).prepend(message);
+        $('div.error', obj).show();
+    },
+    
+    /**
      * Decode HTML entities
      *
      * @example jamal.view.decode_html()

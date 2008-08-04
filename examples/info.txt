@@ -1,0 +1,6 @@
+This Folder contains some implementation examples of the JAMAL Framework
+
+- air-simple
+  
+  Very basic example of Adobe Air integration if you wish to programm an html / JS based AIR software
+  this uses the sample code provided with jamal
