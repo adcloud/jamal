@@ -72,11 +72,14 @@ jamal.fn.extend(jamal.fn.m.prototype, {
      * @name settings
      */
     settings: function(){
+        var model = this;
+        
         return {
             dataType: 'json',
             error: function(xhr, type, exception){
                 if(model.error()) {
-                    jamal.error('Ajax error: ' + type, exception);
+                    var status = xhr.status + ' ' + xhr.statusText;
+                    jamal.error('Ajax - ' + type + ' (' + status + ')', exception);
                 }
             },
             success: function(response) {
@@ -162,14 +165,13 @@ jamal.fn.extend(jamal.fn.m.prototype, {
      * @param Function callback A function to be executed whenever the data is loaded.
      * @cat model
      */
-    save: function(id, data, callback) {
+    save: function(action, data, callback) {
         var model = this;
-        model.id = id;
         model.data = data;
         var settings = this.settings();
         
         settings.type = 'POST';
-        settings.url = this.getUrl();
+        settings.url = action;
         
         settings.beforeSend = function(xhr) {
             jamal.ajaxSend(xhr);
@@ -342,6 +344,9 @@ jamal.fn.extend(jamal.fn.m.prototype, {
     callback: function(response){
         if(response.error) {
             var error = response.error;
+            $j.dir(error);
+            $j.log('hallo');
+            
             $j.error(error.error + ' (' + error.code + '): ' + error.description + ' in ' + error.file);
             $j.log('Stack:');
             $j.log(error.stack);

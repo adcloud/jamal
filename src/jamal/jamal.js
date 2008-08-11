@@ -208,12 +208,13 @@ jamal.fn = jamal.prototype = {
         
         // capture errors
         jQuery(window).error(function(message, file, line) {
-            var e = {'name':'window.onerror',
-                     'message':message,
-                     'file':file,
-                     'line':line,
-                     'stack':''
-                    };
+            var e = {
+                'name':'window.onerror',
+                'message':message,
+                'file':file,
+                'line':line,
+                'stack':''
+            };
             if(jamal.fn === undefined) {
                 $j.error('Window error captured!', e);
             } else {
@@ -264,19 +265,20 @@ jamal.fn = jamal.prototype = {
      */
     error: function(message) {
         if (this.debug === true) {
-            if (arguments.length>1) {
+            if (arguments.length>1 && arguments[1]) {
                 e = arguments[1];
-                window.console.error('Jamal Error: '+message, e);
-                if(typeof e.message === "object") {
-                    this.log(e.name+': ');
+                
+                window.console.error('Jamal Error: ' + message, e);
+                if (typeof e.message === "object") {
+                    this.log(e.name + ': ');
                     this.dir(e.message);
                 } else {
-                    this.log(e.name+': '+e.message);
+                    this.log(e.name + ': ' + e.message);
                 }
                 this.dir(e);
                 this.log('Stack: ' + e.stack);
             } else {
-                window.console.error('Jamal Error: '+message);
+                window.console.error('Jamal Error: ' + message);
             }
         }
     },

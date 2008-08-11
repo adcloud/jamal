@@ -128,6 +128,22 @@ jamal.fn.extend(jamal.fn.v.prototype, {
     },
     
     /**
+     * Start a form submit
+     */
+    submitInProgress: function() {
+        this.addSpinner(this);
+        $('div.submit', this).hide();
+    },
+    
+    /**
+     * Form submit done
+     */
+    submitDone: function() {
+        this.removeSpinner();
+        $('div.submit', this).show();
+    },
+    
+    /**
      * Decode HTML entities
      *
      * @example jamal.view.decode_html()
