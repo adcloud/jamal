@@ -208,13 +208,16 @@ jamal.fn = jamal.prototype = {
         
         // capture errors
         jQuery(window).error(function(message, file, line) {
-            var e = {
-                'name':'window.onerror',
-                'message':message,
-                'file':file,
-                'line':line,
-                'stack':''
-            };
+            var e;
+            if(file && line) {
+                e = {
+                    'name': 'window.onerror',
+                    'message': message,
+                    'file': file,
+                    'line': line,
+                    'stack': ''
+                };
+            }
             if(jamal.fn === undefined) {
                 $j.error('Window error captured!', e);
             } else {

@@ -83,11 +83,11 @@ jamal.fn.extend(jamal.fn.m.prototype, {
                 }
             },
             success: function(response) {
-                response = this.callback(response);
+                
                 jamal.ajaxSuccess(response);
                 if(model.callback(response)) {
-                    if(callback) {
-                        callback(response);
+                    if(this.callback) {
+                        this.callback(response);
                     }
                 }
             }
@@ -120,13 +120,12 @@ jamal.fn.extend(jamal.fn.m.prototype, {
      * @param Function callback A function to be executed whenever the data is loaded.
      * @cat model
      */
-    find: function(id, callback) {
+    find: function(action, callback) {
         var model = this;
-        model.id = id;
         var settings = this.settings();
 
         settings.type = 'GET';
-        settings.url = this.getUrl();
+        settings.url = action;
         
         settings.beforeSend = function(xhr) {
             jamal.ajaxSend(xhr);
@@ -180,11 +179,13 @@ jamal.fn.extend(jamal.fn.m.prototype, {
         };
         
         settings.callback = function(result) {
-            model.afterSave(result);
+            if(model.afterSave(response)) {
+                callback.call($j.current, response);
+            }
         };
         
         jQuery.ajax(settings);
-    },    
+    },
     /**
      * Backwards compatibility
      *
@@ -344,8 +345,6 @@ jamal.fn.extend(jamal.fn.m.prototype, {
     callback: function(response){
         if(response.error) {
             var error = response.error;
-            $j.dir(error);
-            $j.log('hallo');
             
             $j.error(error.error + ' (' + error.code + '): ' + error.description + ' in ' + error.file);
             $j.log('Stack:');
@@ -356,7 +355,7 @@ jamal.fn.extend(jamal.fn.m.prototype, {
             $j.dir(error.listing);
             return false;
         }
-        return response;
+        return true;
     }
 });
 
