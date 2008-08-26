@@ -178,7 +178,7 @@ jamal.fn.extend(jamal.fn.m.prototype, {
             return this.data;
         };
         
-        settings.callback = function(result) {
+        settings.callback = function(response) {
             if(model.afterSave(response)) {
                 callback.call($j.current, response);
             }
@@ -186,6 +186,7 @@ jamal.fn.extend(jamal.fn.m.prototype, {
         
         jQuery.ajax(settings);
     },
+    
     /**
      * Backwards compatibility
      *

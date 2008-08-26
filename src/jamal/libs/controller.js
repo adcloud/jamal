@@ -155,12 +155,12 @@ jamal.fn.extend(jamal.fn.c.prototype, {
                 before.call($j.current, $this);
                 
                 // get the form elements
-                var a = {};
+                var data = {};
                 var form = $this;
                 var elements = $(form).get(0).elements;
                 
                 // get all the data
-                for(var i = 0; i < elements.length; i++) {
+                for(var i in elements) {
                     var o = elements[i];
                     if((o.type == 'checkbox' || o.type == 'radio') && !o.checked) {
                         continue;
@@ -174,18 +174,18 @@ jamal.fn.extend(jamal.fn.c.prototype, {
                     if(o.type == "submit" && $this.get(0).clicked != o) {
                         continue;
                     }
-                    a[o.name] = o.value;
+                    data[o.name] = o.value;
                 }
                 
                 // start the ajax submit
                 $j.current.v.submitInProgress();
-                $j.current.m.save($(form).attr('action'), a, function(response){
+                $j.current.m.save($(form).attr('action'), data, function(response){
                     if(response.error_code) {
                         $j.current.v.addError(response.error_message, form);
                     }
                     $j.current.v.submitDone();
                     
-                    if($.isFunction(callback)) {
+                    if($.isFunction(after)) {
                         after.call($j.current, response);
                     }
                 });
