@@ -120,7 +120,7 @@ jamal.fn.extend(jamal.fn.m.prototype, {
      * @param Function callback A function to be executed whenever the data is loaded.
      * @cat model
      */
-    find: function(action, callback) {
+    get: function(action, callback) {
         var model = this;
         var settings = this.settings();
 
@@ -133,7 +133,8 @@ jamal.fn.extend(jamal.fn.m.prototype, {
         };
         
         settings.callback = function(result) {
-            model.afterFind(result);
+            result = model.afterFind(result);
+            callback(result);
         };
         
         jQuery.ajax(settings);
