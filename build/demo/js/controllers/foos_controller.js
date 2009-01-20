@@ -31,8 +31,6 @@
  *
  */
 $j.c({Foos: {
-    name: 'FoosController',
-    
     /**
      * Foo index
      */

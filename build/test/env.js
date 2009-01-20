@@ -1,7 +1,7 @@
 /*
- * Simulated browser environment for Rhino
+ * Pure JavaScript Browser Environment
  *   By John Resig <http://ejohn.org/>
- * Copyright 2007 John Resig, under the MIT License
+ * Copyright 2008 John Resig, under the MIT License
  */
 
 // The window Object
@@ -143,6 +143,9 @@ var window = this;
 	};
 	
 	DOMDocument.prototype = {
+		get nodeType(){
+			return 9;
+		},
 		createTextNode: function(text){
 			return makeNode( this._dom.createTextNode(
 				text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")) );
@@ -153,6 +156,19 @@ var window = this;
 		getElementsByTagName: function(name){
 			return new DOMNodeList( this._dom.getElementsByTagName(
 				name.toLowerCase()) );
+		},
+		getElementsByName: function(name){
+			var elems = this._dom.getElementsByTagName("*"), ret = [];
+			ret.item = function(i){ return this[i]; };
+			ret.getLength = function(){ return this.length; };
+			
+			for ( var i = 0; i < elems.length; i++ ) {
+				var elem = elems.item(i);
+				if ( elem.getAttribute("name") == name )
+					ret.push( elem );
+			}
+			
+			return new DOMNodeList( ret );
 		},
 		getElementById: function(id){
 			var elems = this._dom.getElementsByTagName("*");
@@ -264,6 +280,9 @@ var window = this;
 		get nodeName() {
 			return this._dom.getNodeName();
 		},
+		get childNodes(){
+			return new DOMNodeList( this._dom.getChildNodes() );
+		},
 		cloneNode: function(deep){
 			return makeNode( this._dom.cloneNode(deep) );
 		},
@@ -290,6 +309,19 @@ var window = this;
 		}
 	};
 
+	window.DOMComment = function(node){
+		this._dom = node;
+	};
+
+	DOMComment.prototype = extend(new DOMNode(), {
+		get nodeType(){
+			return 8;
+		},
+		get outerHTML(){
+			return "<!--" + this.nodeValue + "-->";
+		}
+	});
+
 	// DOM Element
 
 	window.DOMElement = function(elem){
@@ -307,14 +339,37 @@ var window = this;
 			if ( style.length == 2 )
 				this.style[ style[0] ] = style[1];
 		}
+		
+		if ( this.nodeName == "FORM" ) {
+			this.__defineGetter__("elements", function(){
+				return this.getElementsByTagName("*");
+			});
+			
+			this.__defineGetter__("length", function(){
+				var elems = this.elements;
+				for ( var i = 0; i < elems.length; i++ ) {
+					this[i] = elems[i];
+				}
+				
+				return elems.length;
+			});
+		}
+
+		if ( this.nodeName == "SELECT" ) {
+			this.__defineGetter__("options", function(){
+				return this.getElementsByTagName("option");
+			});
+		}
+
+		this.defaultValue = this.value;
 	};
 	
 	DOMElement.prototype = extend( new DOMNode(), {
 		get nodeName(){
-			return this.tagName.toUpperCase();
+			return this.tagName;
 		},
 		get tagName(){
-			return this._dom.getTagName();
+			return this._dom.getTagName().toUpperCase();
 		},
 		toString: function(){
 			return "<" + this.tagName + (this.id ? "#" + this.id : "" ) + ">";
@@ -349,7 +404,7 @@ var window = this;
 		set innerHTML(html){
 			html = html.replace(/<\/?([A-Z]+)/g, function(m){
 				return m.toLowerCase();
-			});
+			}).replace(/&nbsp;/g, " ");
 			
 			var nodes = this.ownerDocument.importNode(
 				new DOMDocument( new java.io.ByteArrayInputStream(
@@ -435,7 +490,10 @@ var window = this;
 		
 		get type() { return this.getAttribute("type") || ""; },
 		set type(val) { return this.setAttribute("type",val); },
-		
+
+		get defaultValue() { return this.getAttribute("defaultValue") || ""; },
+		set defaultValue(val) { return this.setAttribute("defaultValue",val); },
+
 		get value() { return this.getAttribute("value") || ""; },
 		set value(val) { return this.setAttribute("value",val); },
 		
@@ -471,6 +529,21 @@ var window = this;
 		},
 		insertBefore: function(node,before){
 			this._dom.insertBefore( node._dom, before ? before._dom : before );
+			
+			execScripts( node );
+			
+			function execScripts( node ) {
+				if ( node.nodeName == "SCRIPT" ) {
+					if ( !node.getAttribute("src") ) {
+						eval.call( window, node.textContent );
+					}
+				} else {
+					var scripts = node.getElementsByTagName("script");
+					for ( var i = 0; i < scripts.length; i++ ) {
+						execScripts( node );
+					}
+				}
+			}
 		},
 		removeChild: function(node){
 			this._dom.removeChild( node._dom );
@@ -501,9 +574,6 @@ var window = this;
 			var event = document.createEvent();
 			event.initEvent("blur");
 			this.dispatchEvent(event);
-		},
-		get elements(){
-			return this.getElementsByTagName("*");
 		},
 		get contentWindow(){
 			return this.nodeName == "IFRAME" ? {
@@ -548,9 +618,11 @@ var window = this;
 	function makeNode(node){
 		if ( node ) {
 			if ( !obj_nodes.containsKey( node ) )
-				obj_nodes.put( node, node.getNodeType() == 
-					Packages.org.w3c.dom.Node.ELEMENT_NODE ?
-						new DOMElement( node ) : new DOMNode( node ) );
+				obj_nodes.put( node, node.getNodeType() == 1?
+					new DOMElement( node ) :
+					node.getNodeType() == 8 ?
+					new DOMComment( node ) :
+					new DOMNode( node ) );
 			
 			return obj_nodes.get(node);
 		} else
@@ -628,18 +700,33 @@ var window = this;
 					self.readyState = 4;
 					self.status = parseInt(connection.responseCode) || undefined;
 					self.statusText = connection.responseMessage || "";
+
+					var contentEncoding = connection.getContentEncoding() || "utf-8",
+						stream = (contentEncoding.equalsIgnoreCase("gzip") || contentEncoding.equalsIgnoreCase("decompress") )?
+       							new java.util.zip.GZIPInputStream(connection.getInputStream()) :
+       							connection.getInputStream(),
+						baos = new java.io.ByteArrayOutputStream(),
+       						buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
+						length,
+						responseXML = null;
+
+					while ((length = stream.read(buffer)) != -1) {
+						baos.write(buffer, 0, length);
+					}
+
+					baos.close();
+					stream.close();
+
+					self.responseText = java.nio.charset.Charset.forName(contentEncoding)
+						.decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString();
 					
-					var stream = new java.io.InputStreamReader(connection.getInputStream()),
-						buffer = new java.io.BufferedReader(stream), line;
-					
-					while ((line = buffer.readLine()) != null)
-						self.responseText += line;
-						
-					self.responseXML = null;
+					self.__defineGetter__("responseXML", function(){
+						return responseXML;
+					});
 					
 					if ( self.responseText.match(/^\s*</) ) {
 						try {
-							self.responseXML = new DOMDocument(
+							responseXML = new DOMDocument(
 								new java.io.ByteArrayInputStream(
 									(new java.lang.String(
 										self.responseText)).getBytes("UTF8")));
@@ -665,7 +752,7 @@ var window = this;
 			else {
 				var returnedHeaders = [];
 				for (var rHeader in this.responseHeaders) {
-					if (rHeader.match(new Regexp(header, "i")))
+					if (rHeader.match(new RegExp(header, "i")))
 						returnedHeaders.push(this.responseHeaders[rHeader]);
 				}
 			

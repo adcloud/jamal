@@ -58,7 +58,7 @@
         </java>
     </target>
 
-    <target name="test" depends="pack" description="">
+<!--    <target name="test" depends="pack" description="">
         <copy todir="${TEST_DIR}">
             <fileset dir="test/" />
         </copy>
@@ -85,8 +85,8 @@
     <target name="test_success" depends="test" unless="HAS_ERRORS">
         <echo message="Success!" />
     </target>
-    
-    <target name="demo" depends="test_abort,test_success" description="">
+-->    
+    <target name="demo" depends="pack" description="">
         <echo message="Building demo application..." />
         <copy todir="${DEMO_DIR}">
             <fileset dir="demo/" />

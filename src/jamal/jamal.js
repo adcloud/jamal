@@ -260,7 +260,7 @@ jamal.fn = jamal.prototype = {
      * @example jamal.error('Controller not found!');
      *
      * @public
-     * @name start
+     * @name error
      * @type debug
      * @param String message Error message to be displayed on the console
      * @param Object e (optional) Error object to display the original error
@@ -271,17 +271,58 @@ jamal.fn = jamal.prototype = {
             if (arguments.length>1 && arguments[1]) {
                 e = arguments[1];
                 
-                window.console.error('Jamal Error: ' + message, e);
-                if (typeof e.message === "object") {
-                    this.log(e.name + ': ');
-                    this.dir(e.message);
+                window.console.error('Jamal Error: '+message, e);
+                if(typeof e === "object") {
+                    if(typeof e.message === "object") {
+                        this.log(e.name+': ');
+                        this.dir(e.message);
+                    } else {
+                        this.log(e.name+': '+e.message);
+                    }
+                    this.dir(e);
+                    this.log('Stack: ' + e.stack);
                 } else {
-                    this.log(e.name + ': ' + e.message);
+                    this.log(e);
+                    this.log('Stack:');
+                    this.dir(this.callstack());
                 }
-                this.dir(e);
-                this.log('Stack: ' + e.stack);
             } else {
                 window.console.error('Jamal Error: ' + message);
+            }
+        }
+    },
+    
+    /**
+     * This function returns an array of objects that contain the 
+     * information about call stack.
+     *
+     * @example callstack = jamal.callstack();
+     *
+     * @public
+     * @name callstack
+     * @type debug
+     * @cat log
+     */
+    callstack: function() {
+        var re_without_parenthesis = /[(][^)]*[)]/;
+        var re_file_line = /(.*):(\d+)$/;
+        
+        var stack = new Error().stack.split('\n');
+        stack.splice(0,2); // remove first two stack frames
+        
+        var frames = [];
+        for(var i in stack) {
+            // a stack frame string split into parts
+            var frame = stack[i].split('@');
+            if(frame && frame.length == 2) {
+                frame = {
+                    // Stackframe object
+                    'name': frame[0],
+                    'source': frame[0].replace(re_without_parenthesis, ''),
+                    'file': frame[1].match(re_file_line)[1], // first group
+                    'line': frame[1].match(re_file_line)[2]  // second group
+                };
+                this.log('at ' + frame.file + ' (' + frame.name + ': ' + frame.line + ')');
             }
         }
     },
@@ -326,7 +367,7 @@ jamal.fn = jamal.prototype = {
      */
     configure: function() {
         try {
-            var data = jQuery(this.root+'.jamal').data();
+            var data = jQuery(this.root+'.jamal').metadata();
         } catch(e) {
             this.debug = true;
             this.error('jQuery Metadata Plugin failed to read the configuration. '+
@@ -358,46 +399,47 @@ jamal.fn = jamal.prototype = {
      */
     load: function () {
         var loaded = false;
-        if (typeof this.c[this.name] === 'object') {
-            
-            // controller
-            try {
-                this.current = this.c[this.name];
-            } catch(e) {
-                this.error('Controller error!', e);
-            }
-            
-            // callback before the action
-            this.current.beforeAction();
-            
-            // components
-            if(this.current.components) {
-                for(var i in this.current.components) {
-                    try {
-                        this[this.current.components[i]]();
-                    } catch(e) {
-                        this.error(this.current.components[i]+' component error!', e);
-                    }
-                }
-            }
-            
-            // action
-            if (typeof this.c[this.name][this.action] === 'function') {
-                try {
-                    this.current[this.action]();
-                    loaded = true;
-                } catch(e) {
-                    this.error('Action couldn\'t be started!', e);
-                }
-            } else {
-                this.log('Action not found!');
-            }
-            
-            // callback after the action
-            this.current.afterAction();
-        } else {
-            this.log('Controller not found!');
+        if (typeof this.c[this.name] !== 'object') {
+            jamal.fn = jamal;
+            $j.c({Generic: {}});
+            this.name = 'Generic';
         }
+        
+        // controller
+        try {
+            this.current = this.c[this.name];
+        } catch(e) {
+            this.error('Controller error!', e);
+        }
+        
+        // callback before the action
+        this.current.beforeAction();
+        
+        // components
+        if(this.current.components) {
+            for(var i in this.current.components) {
+                try {
+                    this[this.current.components[i]]();
+                } catch(e) {
+                    this.error(this.current.components[i]+' component error!', e);
+                }
+            }
+        }
+        
+        // action
+        if (typeof this.c[this.name][this.action] === 'function') {
+            try {
+                this.current[this.action]();
+                loaded = true;
+            } catch(e) {
+                this.error('Action couldn\'t be started!', e);
+            }
+        } else {
+            this.log('Action not found!');
+        }
+        
+        // callback after the action
+        this.current.afterAction();
         return loaded;
     },
 
