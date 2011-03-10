@@ -1,8 +1,7 @@
-/* SVN FILE: $Id$ */
 /**
- * This is the Jamal core. Heavily inspired by jQuery's architecture. 
+ * This is the Jamal core. Heavily inspired by jQuery's architecture.
  *
- * To quote Dave Cardwell: 
+ * To quote Dave Cardwell:
  * Built on the shoulders of giants:
  *   * John Resig      - http://jquery.com/
  *
@@ -16,13 +15,10 @@
  *
  * @filesource
  * @copyright        Copyright (c) 2006, Timo Derstappen
- * @link            
+ * @link
  * @package          jamal
  * @subpackage       jamal.core
  * @since            Jamal v 0.1
- * @version          $Revision$
- * @modifiedby       $LastChangedBy$
- * @lastmodified     $Date$
  * @license          http://www.opensource.org/licenses/mit-license.php The MIT License
  */
 
@@ -39,7 +35,7 @@ var jamal = function() {
     if (window == this) {
         return new jamal();
     }
-    
+
     return this.configure();
 };
 
@@ -65,7 +61,7 @@ jamal.fn = jamal.prototype = {
     version: '0.4',
 
     /**
-     * Defines the root element with the jamal configuration class. This is 
+     * Defines the root element with the jamal configuration class. This is
      * necessary due to performance. jQuery is a lot faster in finding classes
      * when it knows the holding element.
      *
@@ -177,7 +173,7 @@ jamal.fn = jamal.prototype = {
     events: {},
 
     /* Methods */
-    
+
     /**
      * Method description
      *
@@ -195,29 +191,25 @@ jamal.fn = jamal.prototype = {
         this.dir(jQuery.browser);
         this.log('Controller: ' + this.name);
         this.log('Action: ' + this.action);
-        if (this.debug === true) {
+        if (this.debug === true && typeof window.console != 'undefined' && typeof window.console.time == 'function') {
             window.console.time('Timing');
         }
         var started = this.load();
-        if (this.debug === true) {
+        if (this.debug === true && typeof window.console != 'undefined' && typeof window.console.timeEnd == 'function') {
             window.console.timeEnd('Timing');
         }
         if (jQuery.browser.mozilla) {
             this.log('Jamal size: '+this.toSource().length+' Chars');
         }
-        
+
         // capture errors
         jQuery(window).error(function(message, file, line) {
-            var e;
-            if(file && line) {
-                e = {
-                    'name': 'window.onerror',
-                    'message': message,
-                    'file': file,
-                    'line': line,
-                    'stack': ''
-                };
-            }
+            var e = {'name':'window.onerror',
+                     'message':message,
+                     'file':file,
+                     'line':line,
+                     'stack':''
+                    };
             if(jamal.fn === undefined) {
                 $j.error('Window error captured!', e);
             } else {
@@ -225,7 +217,7 @@ jamal.fn = jamal.prototype = {
             }
             return true;
         });
-                    
+
         return started;
     },
 
@@ -242,7 +234,7 @@ jamal.fn = jamal.prototype = {
      * @cat log
      */
     log: function(message) {
-        if (this.debug === true) {
+        if (this.debug === true && typeof window.console !== 'undefined' && typeof window.console.log == 'function') {
             var log = '';
             for (var i=0; i<arguments.length; i++) {
                 log += arguments[i];
@@ -267,10 +259,9 @@ jamal.fn = jamal.prototype = {
      * @cat log
      */
     error: function(message) {
-        if (this.debug === true) {
-            if (arguments.length>1 && arguments[1]) {
+        if (this.debug === true && typeof window.console !== 'undefined' && typeof window.console.error == 'function') {
+            if (arguments.length>1) {
                 e = arguments[1];
-                
                 window.console.error('Jamal Error: '+message, e);
                 if(typeof e === "object") {
                     if(typeof e.message === "object") {
@@ -287,13 +278,13 @@ jamal.fn = jamal.prototype = {
                     this.dir(this.callstack());
                 }
             } else {
-                window.console.error('Jamal Error: ' + message);
+                window.console.error('Jamal Error: '+message);
             }
         }
     },
-    
+
     /**
-     * This function returns an array of objects that contain the 
+     * This function returns an array of objects that contain the
      * information about call stack.
      *
      * @example callstack = jamal.callstack();
@@ -306,10 +297,10 @@ jamal.fn = jamal.prototype = {
     callstack: function() {
         var re_without_parenthesis = /[(][^)]*[)]/;
         var re_file_line = /(.*):(\d+)$/;
-        
+
         var stack = new Error().stack.split('\n');
         stack.splice(0,2); // remove first two stack frames
-        
+
         var frames = [];
         for(var i in stack) {
             // a stack frame string split into parts
@@ -326,7 +317,7 @@ jamal.fn = jamal.prototype = {
             }
         }
     },
-    
+
     /**
      * Log objects to the console
      *
@@ -340,7 +331,7 @@ jamal.fn = jamal.prototype = {
      * @cat log
      */
     dir: function(obj) {
-        if (this.debug === true) {
+        if (this.debug === true && typeof window.console !== 'undefined' && typeof window.console.dir == "function") {
             window.console.dir(obj);
         }
     },
@@ -352,8 +343,8 @@ jamal.fn = jamal.prototype = {
      * attached. This data is read via jQuery's metadata plugin.
      *
      * This makes it very easy to use jamal with e.g. CakePHP. Just add
-     * <body class="jamal {controller:'<?php echo $this->name; ?>',action:'<?php echo $this->action; ?>'}"> 
-     * to your default layout. Now you only need to create and include the 
+     * <body class="jamal {controller:'<?php echo $this->name; ?>',action:'<?php echo $this->action; ?>'}">
+     * to your default layout. Now you only need to create and include the
      * corresponding js files.
      *
      * @example jamal.configure();
@@ -373,7 +364,7 @@ jamal.fn = jamal.prototype = {
             this.error('jQuery Metadata Plugin failed to read the configuration. '+
                        'Probably there is no class="jamal {controller:\'example\',action:\'index\'}" in your markup!', e);
         }
-        
+
         if (typeof(data) !== 'object') {
             this.debug = true;
             this.error('No configuration found!');
@@ -388,7 +379,7 @@ jamal.fn = jamal.prototype = {
     },
 
     /**
-     * Try to load the controller action 
+     * Try to load the controller action
      *
      * @example jamal.load();
      *
@@ -404,17 +395,17 @@ jamal.fn = jamal.prototype = {
             $j.c({Generic: {}});
             this.name = 'Generic';
         }
-        
+
         // controller
         try {
             this.current = this.c[this.name];
         } catch(e) {
             this.error('Controller error!', e);
         }
-        
+
         // callback before the action
         this.current.beforeAction();
-        
+
         // components
         if(this.current.components) {
             for(var i in this.current.components) {
@@ -425,7 +416,7 @@ jamal.fn = jamal.prototype = {
                 }
             }
         }
-        
+
         // action
         if (typeof this.c[this.name][this.action] === 'function') {
             try {
@@ -437,7 +428,7 @@ jamal.fn = jamal.prototype = {
         } else {
             this.log('Action not found!');
         }
-        
+
         // callback after the action
         this.current.afterAction();
         return loaded;
@@ -445,22 +436,22 @@ jamal.fn = jamal.prototype = {
 
     /**
      * Run this function to give control of the $j variable back
-     * to whichever library first implemented it. This helps to make 
+     * to whichever library first implemented it. This helps to make
      * sure that jamal doesn't conflict with the $j object
      * of other libraries.
      *
      * By using this function, you will only be able to access jamal
      * using the 'jamal' variable. For example, where you used to do
-     * $j.json("/example/action"), you now must do jamal.json("/example/action").
+     * $j.get("/example/action"), you now must do jamal.get("/example/action").
      *
      * @example jamal.noConflict();
      * // Do something with jamal
-     * jamal.json("/example/action");
+     * jamal.get("/example/action");
      * @desc Maps the original object that was referenced by $j back to $j
      *
      * @name noConflict
      * @type undefined
-     * @cat core 
+     * @cat core
      */
     noConflict: function() {
         if (jamal._$) {
@@ -473,7 +464,7 @@ jamal.fn = jamal.prototype = {
 /**
  * Extend one object with one or more others, returning the original,
  * modified, object. This is a great utility for simple inheritance.
- * 
+ *
  * @example var settings = { validate: false, limit: 5, name: "foo" };
  * var options = { validate: true, name: "bar" };
  * jamal.extend(settings, options);
