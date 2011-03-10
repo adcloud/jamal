@@ -1,6 +1,5 @@
-/* SVN FILE: $Id: jamal.js 18 2007-06-13 09:07:32Z teemow $ */
 /**
- * To quote Dave Cardwell: 
+ * To quote Dave Cardwell:
  * Built on the shoulders of giants:
  *   * John Resig      - http://jquery.com/
  *
@@ -12,13 +11,10 @@
  *
  * @filesource
  * @copyright        Copyright (c) 2007, Timo Derstappen
- * @link            
+ * @link
  * @package          jamal
  * @subpackage       jamal.session
  * @since            Jamal v 0.4
- * @version          $Revision$
- * @modifiedby       $LastChangedBy$
- * @lastmodified     $Date$
  * @license          http://www.opensource.org/licenses/mit-license.php The MIT License
  */
 
@@ -30,6 +26,7 @@
  * @public
  * @name jamal
  * @cat session
+ * @deprecated
  */
 jamal.fn.extend({
     /* Constructor */
@@ -48,13 +45,13 @@ jamal.fn.extend({
             this.log('Session activated');
             this.session.active = true;
             this.session.since = 0;
-            
+
             jamal.ajaxSend(function(xhr){
                 if(jamal.session.active){
                     jamal.session.reset();
                 }
             });
-            
+
             jamal.ajaxSuccess(function(e, response){
                 if(jamal.session.active){
                     if(response.session_timeout) {
@@ -65,14 +62,14 @@ jamal.fn.extend({
                     }
                 }
             });
-            
+
             this.session.check();
-            
+
             return true;
         }
         return false;
     }
-}); 
+});
 
 jamal.fn.extend(jamal.fn.session, {
 	/**
@@ -85,7 +82,7 @@ jamal.fn.extend(jamal.fn.session, {
 	 * @cat session
 	 */
     active: false,
-    
+
 	/**
 	 * Minutes a session lasts. After this time the user gets logged out and
      * is warned by a notification.
@@ -119,7 +116,7 @@ jamal.fn.extend(jamal.fn.session, {
 	 * @cat session
 	 */
     since: 0, // minutes
-    
+
 	/**
      * Check the session on the server side
 	 *
@@ -133,7 +130,7 @@ jamal.fn.extend(jamal.fn.session, {
     check: function() {
         if (this.since < this.timeout) {
             if (this.since > 0) {
-                
+
                 var settings = {
                     url: '/session/',
                     type: 'GET',
@@ -145,7 +142,7 @@ jamal.fn.extend(jamal.fn.session, {
                         }
                     }
                 };
-                
+
                 jQuery.ajax(settings);
             }
             this.since += this.freq/60;
@@ -154,15 +151,15 @@ jamal.fn.extend(jamal.fn.session, {
             this.destroy();
         }
     },
-    
+
 	/**
      * Kills a jamal session
      *
-     * Calls the url /logout/ to kill the session on the server side. It is 
+     * Calls the url /logout/ to kill the session on the server side. It is
      * expected to get back some information to be displayed in a modal dialog
 	 *
 	 * @example jamal.session.destroy();
-     * @desc Destroys the current session 
+     * @desc Destroys the current session
 	 *
 	 * @private
 	 * @name destroy
@@ -172,9 +169,9 @@ jamal.fn.extend(jamal.fn.session, {
     destroy: function() {
         this.active = false;
         jamal.log('Session killed');
-        
+
         var settings = {
-            url: '/logout/',
+            url: '/timeout/',
             type: 'GET',
             dataType: 'json',
             global: 'false',
@@ -182,7 +179,7 @@ jamal.fn.extend(jamal.fn.session, {
                 if (response.redirect) {
                     jamal.session.redirect();
                 }
-                
+
                 jamal.modal(response.content);
                 jamal.session.callback();
             }
@@ -190,7 +187,7 @@ jamal.fn.extend(jamal.fn.session, {
 
         jQuery.ajax(settings);
     },
-    
+
     /**
      * Empty callback to customize the login screen handling
      *
@@ -200,7 +197,7 @@ jamal.fn.extend(jamal.fn.session, {
      *         alert('logged in');
      *     });
      * };
-     * 
+     *
      * @public
      * @name jamal.session.callback
      * @type Function
@@ -209,7 +206,7 @@ jamal.fn.extend(jamal.fn.session, {
     callback: function() {
         return;
     },
-     
+
     /**
      * Reloads the current page
      *
@@ -224,7 +221,7 @@ jamal.fn.extend(jamal.fn.session, {
     reload: function() {
         window.location.replace(window.location.href);
     },
-    
+
 	/**
      * Reset jamal's session timer
 	 *
@@ -237,6 +234,6 @@ jamal.fn.extend(jamal.fn.session, {
 	 */
     reset: function() {
         this.since = 0;
-    }    
+    }
 });
 

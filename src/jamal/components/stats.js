@@ -1,6 +1,6 @@
 /* SVN FILE: $Id: jamal.js 18 2007-06-13 09:07:32Z teemow $ */
 /**
- * To quote Dave Cardwell: 
+ * To quote Dave Cardwell:
  * Built on the shoulders of giants:
  *   * John Resig      - http://jquery.com/
  *
@@ -12,7 +12,7 @@
  *
  * @filesource
  * @copyright        Copyright (c) 2007, Timo Derstappen
- * @link            
+ * @link
  * @package          jamal
  * @subpackage       jamal.stats
  * @since            Jamal v 0.4
@@ -28,6 +28,7 @@
  * @public
  * @name jamal
  * @cat stats
+ * @deprecated
  */
 jamal.fn.extend({
     /* Constructor */
@@ -46,10 +47,10 @@ jamal.fn.extend({
 
          // bind click events
          jQuery("*").click($j.stats.log);
-         
+
          jamal.log('Stats activated');
      }
-}); 
+});
 
 jamal.fn.extend(jamal.fn.stats, {
 	/**
@@ -61,7 +62,7 @@ jamal.fn.extend(jamal.fn.stats, {
 	 * @type Boolean
 	 * @cat stats
 	 */
-    active: false,       
+    active: false,
 
 	/**
      * Method description
@@ -85,11 +86,11 @@ jamal.fn.extend(jamal.fn.stats, {
                 }
             }
         }
-        
+
         function getAttributes(obj) {
             // get id or classes of an element
             var attributes = '';
-            
+
             if (obj.id && obj.id!=='') {
                 attributes = '#'+obj.id;
             }
@@ -112,7 +113,7 @@ jamal.fn.extend(jamal.fn.stats, {
             }
             return attributes;
         }
-        
+
         // create jQuery selector path for this element
         var link = '';
         if (this.tagName.toLowerCase() === 'body') {
@@ -129,14 +130,14 @@ jamal.fn.extend(jamal.fn.stats, {
         });
         dom_path_elements.reverse();
         var dom_path = dom_path_elements.join(' ');
-        
+
         // get mouse position
         if (jQuery.browser.msie) {
             var position = event.clientX + document.body.scrollLeft + 'x' + event.clientY + document.body.scrollTop;
         } else {
             var position = e.pageX + 'x' + e.pageY;
         }
-        
+
         // find the action
         switch (this.tagName.toLowerCase()) {
             case 'a':
@@ -155,15 +156,15 @@ jamal.fn.extend(jamal.fn.stats, {
             default:
                 link = 'click';
         }
-        
+
         // get current screen size
         var screensize = screen.width+'x'+screen.height;
         if (jQuery.browser.msie) {
             var windowsize = document.body.clientWidth+'x'+document.body.clientHeight;
-        } else {            
+        } else {
             var windowsize = window.innerWidth+'x'+window.innerHeight;
         }
-        
+
         // send log to the server
         var settings = {
             url: '/statistics/',
@@ -209,9 +210,9 @@ jamal.fn.extend(jamal.fn.stats, {
                     var el_path = unescape(response.data[i]['dom_path'] + ' ' + response.data[i]['element']);
                     var el = jQuery(el_path).get(0);
                     if (response.data[i]['clicks'] > 1) {
-                        overlay = '<div class="jamal_stats" title="'+el_path+'">'+response.data[i]['clicks']+' Clicks</div>';                    
+                        overlay = '<div class="jamal_stats" title="'+el_path+'">'+response.data[i]['clicks']+' Clicks</div>';
                     } else {
-                        overlay = '<div class="jamal_stats" title="'+el_path+'">'+response.data[i]['clicks']+' Click</div>';                    
+                        overlay = '<div class="jamal_stats" title="'+el_path+'">'+response.data[i]['clicks']+' Click</div>';
                     }
                     switch (el.tagName.toLowerCase()) {
                         case 'input':
@@ -234,9 +235,10 @@ jamal.fn.extend(jamal.fn.stats, {
                                          .css('line-height', '1em')
                                          .css('letter-spacing', '0')
                                          .css('z-index', '99');
-                
+
             }
         };
         jQuery.ajax(settings);
-    }   
+    }
 });
+
