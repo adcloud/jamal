@@ -1,6 +1,5 @@
-/* SVN FILE: $Id: jamal.js 22 2007-06-28 00:09:37Z teemow $ */
 /**
- * To quote Dave Cardwell: 
+ * To quote Dave Cardwell:
  * Built on the shoulders of giants:
  *   * John Resig      - http://jquery.com/
  *
@@ -12,13 +11,10 @@
  *
  * @filesource
  * @copyright        Copyright (c) 2006, Timo Derstappen
- * @link            
+ * @link
  * @package          jamal
  * @subpackage       jamal.core
  * @since            Jamal v 0.1
- * @version          $Revision$
- * @modifiedby       $LastChangedBy$
- * @lastmodified     $Date$
  * @license          http://www.opensource.org/licenses/mit-license.php The MIT License
  */
 
@@ -32,7 +28,7 @@
  */
 /**
  * Inherit a controller from the jamal app controller
- * 
+ *
  * @example $j.c({Foos:{
  *     index: function(){
  *         alert('hello world');
@@ -52,7 +48,7 @@ jamal.c = jamal.fn.c = function(controller) {
         for(var i in controller) {
             inherited = new jamal.fn.c(i);
             jamal.extend(inherited, controller[i]);
-            
+
             // add model
             var m = i.substr(0, i.length-1).replace(/ie$/, 'y'); // name is singular
             if(jamal.fn.m[m]) {
@@ -61,7 +57,7 @@ jamal.c = jamal.fn.c = function(controller) {
                 // if no model create one
                 inherited.m = jamal.fn.m[m] = new jamal.fn.m(m);
             }
-            
+
             // add view
             if(jamal.fn.v[i]) {
                 inherited.v = jamal.fn.v[i];
@@ -69,7 +65,7 @@ jamal.c = jamal.fn.c = function(controller) {
                 // if no view create one
                 inherited.v = jamal.fn.v[i] = new jamal.fn.v(i);
             }
-            
+
             controller[i] = inherited;
         }
         jamal.extend(jamal.fn.c, controller);
@@ -88,7 +84,7 @@ jamal.fn.extend(jamal.fn.c.prototype, {
      * @name beforeAction
      * @cat controller
      */
-    beforeAction: function(){
+    beforeAction: function(filter){
     },
 
     /**
@@ -100,7 +96,76 @@ jamal.fn.extend(jamal.fn.c.prototype, {
      * @name beforeAction
      * @cat controller
      */
-    afterAction: function(){
+    afterAction: function(filter){
+    },
+
+    /**
+     * Bind a form to the model method
+     *
+     * @example controller.form('form');
+     *
+     * @public
+     * @name form
+     * @cat controller
+     * @param string element
+     * @param function before
+     * @param function after
+     *
+     * @return void
+     */
+    form: function(element, before, after){
+
+        // set the clicked button to proof
+        $(element + " input:submit").live('click', function(event){
+            var form = $(this).parents("form");
+            form.get(0).clicked = this;
+        })
+
+        // check submited form data
+        return $(element).live('submit', function(event){
+            event.preventDefault();
+
+            var form = this;
+
+            if($.isFunction(before)) {
+                before.call(form);
+            }
+
+            // get the form elements
+            var data = {};
+            var elements = $(form).get(0).elements;
+
+            // get all the data
+            for(var i=0; i<elements.length; i++) {
+                var o = elements[i];
+                if((o.type == 'checkbox' || o.type == 'radio') && !o.checked) {
+                    continue;
+                }
+                if(o.type == "button") {
+                    continue;
+                }
+                if(!o.name) {
+                    continue;
+                }
+                if(o.type == "submit" && $(form).get(0).clicked != o) {
+                    continue;
+                }
+                data[o.name] = o.value;
+            }
+
+            // start the ajax submit
+            $j.current.m.post($(form).attr('action'), data, function(response){
+                if(response.error_code) {
+                    $j.current.v.addError(response.error_message, form);
+                }
+                $j.current.v.removeSpinner();
+
+                if($.isFunction(after)) {
+                    after.call(form, response);
+                }
+            });
+            return true;
+        });
     },
 
     /**
@@ -111,87 +176,18 @@ jamal.fn.extend(jamal.fn.c.prototype, {
      *
      * @example filter = $('#list');
      * jamal.controller.init(filter)
-     * @desc initializes the current controller action but events are only 
+     * @desc initializes the current controller action but events are only
      * bind to elements in #list
-     * 
+     *
      * @public
      * @name init
      * @param Object filter Dom element which should be reinitialized
      * @cat controller
      */
     init: function(filter){
+        jamal.current.beforeAction(filter);
         jamal.current[jamal.action](filter);
-    },
-    
-    /**
-     * Bind a form to the model method
-     *
-     * @example controller.form('form');
-     *
-     * @public
-     * @name form
-     * @param Object
-     * @cat controller
-     */
-    form: function(element, before, after){
-        var $element = $(element);
-        
-        // bind the click on the submit button
-        $('input[@type="submit"]', $element).click(function(){
-            this.form.clicked = this;
-        });
-        
-        // no form
-        if(!$element.get(0)) {
-            return false;
-        }
-        
-        // iterate thru all the forms
-        $element.each(function() {
-            var $this = $(this);
-            
-            // define the submit event
-            return $this.submit(function(){
-                before.call($j.current, $this);
-                
-                // get the form elements
-                var data = {};
-                var form = $this;
-                var elements = $(form).get(0).elements;
-                
-                // get all the data
-                for(var i in elements) {
-                    var o = elements[i];
-                    if((o.type == 'checkbox' || o.type == 'radio') && !o.checked) {
-                        continue;
-                    }
-                    if(o.type == "button") {
-                        continue;
-                    }
-                    if(!o.name) {
-                        continue;
-                    }
-                    if(o.type == "submit" && $this.get(0).clicked != o) {
-                        continue;
-                    }
-                    data[o.name] = o.value;
-                }
-                
-                // start the ajax submit
-                $j.current.v.submitInProgress();
-                $j.current.m.save($(form).attr('action'), data, function(response){
-                    if(response.error_code) {
-                        $j.current.v.addError(response.error_message, form);
-                    }
-                    $j.current.v.submitDone();
-                    
-                    if($.isFunction(after)) {
-                        after.call($j.current, response);
-                    }
-                });
-                return false;
-            });
-        });
+        jamal.current.afterAction(filter);
     }
 });
 
